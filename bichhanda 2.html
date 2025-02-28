@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPOT Session Countdown</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url('https://img.freepik.com/free-photo/teacher-explaining-lesson-classroom_23-2148453642.jpg') no-repeat center center/cover;
+            position: relative;
+        }
+
+        /* Waving Animation */
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .waving-text {
+            font-size: 3em;
+            font-weight: bold;
+            color: yellow;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+            animation: wave 1.5s infinite ease-in-out;
+        }
+
+        h1, #countdown, .button {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #countdown {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: yellow;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 15px 25px;
+            font-size: 1.5em;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: 0.3s;
+            margin: 10px;
+        }
+
+        #join-button {
+            background-color: #ff6600;
+        }
+
+        #join-button:hover {
+            background-color: #cc5500;
+        }
+
+        #whatsapp-button {
+            background-color: #25D366;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        #whatsapp-button:hover {
+            background-color: #20b354;
+        }
+
+        #whatsapp-button img {
+            width: 30px;
+            height: 30px;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.2em;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Waving Bichhanda Text -->
+    <div class="waving-text">Bichhanda</div>
+
+    <h1>SPOT Session Countdown</h1>
+    <p>The session starts in:</p>
+    <div id="countdown">Loading...</div>
+
+    <!-- Join Now Button -->
+    <a class="button" id="join-button" href="https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2FiOTkyYjAtNjFjMS00OTY4LThlMDQtNDEzNDJjYTM1N2Q5%40thread.v2/0?context=%7b%22Tid%22%3a%22cb91b281-3ea4-4888-b449-f587ba2f84ae%22%2c%22Oid%22%3a%22e1907a32-fbc8-438d-b13f-f819918f897c%22%7d" target="_blank">Join Now</a>
+
+    <!-- WhatsApp Button -->
+    <a class="button" id="whatsapp-button" href="https://wa.me/917869647238" target="_blank">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp Logo">
+        WhatsApp
+    </a>
+
+    <footer>
+        &copy; 2025 Fusion Finance LTD. All rights reserved.
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("Countdown script loaded.");
+
+            // Get today's date for 3:00 PM (15:00 IST)
+            const today = new Date();
+            const targetDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 15, 0, 0).getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const timeLeft = targetDate - now;
+
+                if (timeLeft <= 0) {
+                    document.getElementById("countdown").textContent = "Session Started!";
+                    clearInterval(interval);
+                    return;
+                }
+
+                const hours = Math.floor((timeLeft / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((timeLeft / (1000 * 60)) % 60);
+                const seconds = Math.floor((timeLeft / 1000) % 60);
+
+                document.getElementById("countdown").textContent =
+                    `${hours.toString().padStart(2, '0')}:
+                     ${minutes.toString().padStart(2, '0')}:
+                     ${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // Run immediately & every second
+            updateCountdown();
+            const interval = setInterval(updateCountdown, 1000);
+        });
+    </script>
+
+</body>
+</html>
