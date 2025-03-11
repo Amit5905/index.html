@@ -412,4 +412,102 @@
             const nominateModal = document.getElementById("nominate-modal");
 
             window.openModal = function () { spotModal.classList.add("show"); };
-            window.closeModal = function () {
+            window.closeModal = function () { spotModal.classList.remove("show"); };
+            spotModal.addEventListener("click", function (e) { if (e.target === spotModal) closeModal(); });
+
+            const sessionDetails = {
+                deepak: "<h3>September - Center Meetings & Risk Association</h3><p><strong>Deepak Pandey</strong> shared his deep understanding of Center Meetings & Risk Association. His session helped us recognize the crucial role that center meetings play in ensuring financial discipline, customer engagement, and risk mitigation.</p>",
+                shashi: "<h3>October - Importance of Communication in Team Cohesion</h3><p><strong>Shashi</strong> brought an essential soft skills session on how communication is the glue that holds teams together, using engaging discussions and real-world examples.</p>",
+                birti: "<h3>November - Emotional Intelligence</h3><p><strong>Birti Sundar</strong> emphasized how understanding and managing emotions can lead to better leadership, decision-making, and workplace harmony.</p>",
+                parthiban: "<h3>December - SPOT Session on Audit</h3><p><strong>Parthiban</strong> shed light on key audit checkpoints, best practices, and common pitfalls, reinforcing the importance of precision and integrity.</p>",
+                "vishal-past": "<h3>January - Canva Training</h3><p><strong>Vishal</strong> introduced us to Canva, unlocking new skills for designing engaging presentations and reports.</p>",
+                bichhanda: "<h3>February - Webshakti & M Shakti</h3><p><strong>Bichhanda</strong> guided us through Webshakti & M Shakti, enhancing our ability to streamline processes with these digital tools.</p>",
+                "vishal-upcoming": "<h3>April 11 - Canva Training (Upcoming)</h3><p><strong>Vishal Nandan Tiwari</strong> returns on April 11, 2025, at 3:00 PM IST to deepen our Canva skills for creating stunning visual content!</p>",
+                amit: "<h3>March 24 - Topic TBD (Upcoming)</h3><p><strong>Amit Pandey</strong> will present on March 24, 2025. Stay tuned for the topic and time details!</p>"
+            };
+
+            window.showCelebration = function (trainer) {
+                document.getElementById("celebration-content").innerHTML = sessionDetails[trainer] || "<h3>Details Coming Soon</h3><p>Stay tuned for more information!</p>";
+                celebrationModal.classList.add("show");
+                startConfetti();
+            };
+            window.closeCelebration = function () { celebrationModal.classList.remove("show"); stopConfetti(); };
+            celebrationModal.addEventListener("click", function (e) { if (e.target === celebrationModal) closeCelebration(); });
+
+            let confettiInterval;
+            function startConfetti() {
+                const canvas = document.getElementById("confetti-canvas");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                confettiInterval = setInterval(() => {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF4500', '#00FF00'] });
+                }, 500);
+            }
+            function stopConfetti() { clearInterval(confettiInterval); confetti.reset(); }
+
+            window.openFeedback = function () { feedbackModal.classList.add("show"); };
+            window.closeFeedback = function () { feedbackModal.classList.remove("show"); document.getElementById("feedback-text").value = ""; };
+            feedbackModal.addEventListener("click", function (e) { if (e.target === feedbackModal) closeFeedback(); });
+
+            window.submitFeedback = function () {
+                const feedback = document.getElementById("feedback-text").value.trim();
+                if (feedback) {
+                    if (confirm("Submit feedback via email?")) {
+                        const subject = encodeURIComponent("SPOT Session Feedback");
+                        const body = encodeURIComponent(feedback);
+                        window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
+                        closeFeedback();
+                    }
+                } else {
+                    alert("Please enter your feedback before submitting!");
+                }
+            };
+
+            window.openCalendar = function () {
+                generateCalendar();
+                calendarModal.classList.add("show");
+            };
+            window.closeCalendar = function () { calendarModal.classList.remove("show"); };
+            calendarModal.addEventListener("click", function (e) { if (e.target === calendarModal) closeCalendar(); });
+
+            function generateCalendar() {
+                const calendar = document.getElementById("calendar");
+                calendar.innerHTML = "";
+                const daysInMonth = 31; // March 2025
+                const firstDay = new Date(2025, 2, 1).getDay(); // March 1st, 2025 is a Saturday (6)
+                for (let i = 0; i < firstDay; i++) {
+                    calendar.innerHTML += '<div class="calendar-day"></div>';
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const isEventDay = (day === 24); // Event on March 24
+                    calendar.innerHTML += `<div class="calendar-day ${isEventDay ? 'event' : ''}">${day}</div>`;
+                }
+            }
+
+            window.openUpcoming = function () { upcomingModal.classList.add("show"); };
+            window.closeUpcoming = function () { upcomingModal.classList.remove("show"); };
+            upcomingModal.addEventListener("click", function (e) { if (e.target === upcomingModal) closeUpcoming(); });
+
+            window.openNominate = function () { nominateModal.classList.add("show"); };
+            window.closeNominate = function () { nominateModal.classList.remove("show"); };
+            nominateModal.addEventListener("click", function (e) { if (e.target === nominateModal) closeNominate(); });
+
+            document.getElementById("nominate-form").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const name = document.getElementById("name").value.trim();
+                const employeeCode = document.getElementById("employee-code").value.trim();
+                const topic = document.getElementById("topic").value.trim();
+
+                if (name && employeeCode && topic) {
+                    const subject = encodeURIComponent("SPOT Session Nomination");
+                    const body = encodeURIComponent(`Name: ${name}\nEmployee Code: ${employeeCode}\nTopic: ${topic}`);
+                    window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
+                    closeNominate();
+                } else {
+                    alert("Please fill out all fields before submitting!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>S
