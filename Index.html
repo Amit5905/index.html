@@ -186,22 +186,6 @@
             gap: 10px;
         }
 
-        .countdown-container {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .countdown-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--accent-color); }
-        .countdown { display: flex; justify-content: center; gap: 20px; }
-        .countdown-item { display: flex; flex-direction: column; align-items: center; }
-        .countdown-number { font-size: 2.5rem; font-weight: bold; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .countdown-label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
-
         .spot-features { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; margin: 30px 0; }
         .feature-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 10px; padding: 20px; width: 280px; text-align: center; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1); }
         .feature-card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
@@ -283,7 +267,6 @@
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 15px; }
             h1 { font-size: 1.8em; }
-            .countdown { flex-wrap: wrap; }
             .spot-features { flex-direction: column; align-items: center; }
             .nav-buttons { flex-direction: column; }
         }
@@ -303,22 +286,13 @@
             </div>
         </header>
 
-        <h1>Upcoming SPOT Presenters: <a href="#" id="vishal-link" class="presenter-link" onclick="showCelebration('vishal-upcoming')">Vishal Nandan Tiwari</a> & <a href="#" id="amit-link" class="presenter-link" onclick="showCelebration('amit')">Amit Pandey</a></h1>
-
-        <div class="countdown-container">
-            <div class="countdown-title">Next Session Starts In (Vishal - Canva Training)</div>
-            <div class="countdown">
-                <div class="countdown-item"><div class="countdown-number" id="days">00</div><div class="countdown-label">Days</div></div>
-                <div class="countdown-item"><div class="countdown-number" id="hours">00</div><div class="countdown-label">Hours</div></div>
-                <div class="countdown-item"><div class="countdown-number" id="minutes">00</div><div class="countdown-label">Minutes</div></div>
-                <div class="countdown-item"><div class="countdown-number" id="seconds">00</div><div class="countdown-label">Seconds</div></div>
-            </div>
-        </div>
+        <h1>Upcoming SPOT Presenters: <a href="#" id="amit-link" class="presenter-link" onclick="showCelebration('amit')">Amit Pandey</a> & <a href="#" id="vishal-link" class="presenter-link" onclick="showCelebration('vishal-upcoming')">Vishal Nandan Tiwari</a></h1>
 
         <div class="social-buttons">
             <a class="button success" id="whatsapp-button" href="https://wa.me/917869647238" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
             <a class="button primary" id="spot-button" href="#" onclick="openModal()"><i class="fas fa-history"></i> Past Sessions</a>
             <a class="button warning" href="#" onclick="openUpcoming()"><i class="fas fa-calendar-plus"></i> Upcoming Schedule</a>
+            <a class="button accent" href="#" onclick="openNominate()"><i class="fas fa-user-plus"></i> Nominate Yourself</a>
         </div>
 
         <div class="spot-features">
@@ -397,15 +371,29 @@
         <div class="modal-content">
             <span class="close" onclick="closeUpcoming()"><i class="fas fa-times"></i></span>
             <h3>Upcoming SPOT Sessions</h3>
-            <p>Get ready for these exciting sessions in March 2025!</p>
-            <div class="schedule-card">
-                <h4>Vishal Nandan Tiwari - Canva Training</h4>
-                <p><span class="date">Date:</span> March 11, 2025<br><span class="date">Time:</span> 3:00 PM IST<br>Vishal returns with another engaging session on Canva, helping you master design skills for professional presentations and reports.</p>
-            </div>
+            <p>Get ready for these exciting sessions in March and April 2025!</p>
             <div class="schedule-card">
                 <h4>Amit Pandey - Topic TBD</h4>
                 <p><span class="date">Date:</span> March 24, 2025<br><span class="date">Time:</span> TBD<br>Amit will bring fresh insights to our learning journey. Stay tuned for more details!</p>
             </div>
+            <div class="schedule-card">
+                <h4>Vishal Nandan Tiwari - Canva Training</h4>
+                <p><span class="date">Date:</span> April 11, 2025<br><span class="date">Time:</span> 3:00 PM IST<br>Vishal returns with another engaging session on Canva, helping you master design skills for professional presentations and reports.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="nominate-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeNominate()"><i class="fas fa-times"></i></span>
+            <h3>Nominate Yourself</h3>
+            <p>Share your name, employee code, and topic to nominate yourself for an upcoming SPOT session.</p>
+            <form id="nominate-form">
+                <input type="text" id="name" placeholder="Your Name" required>
+                <input type="text" id="employee-code" placeholder="Employee Code" required>
+                <textarea id="topic" placeholder="Session Topic" required></textarea>
+                <button type="submit" class="button success">Submit Nomination</button>
+            </form>
         </div>
     </div>
 
@@ -421,104 +409,7 @@
             const feedbackModal = document.getElementById("feedback-modal");
             const calendarModal = document.getElementById("calendar-modal");
             const upcomingModal = document.getElementById("upcoming-modal");
+            const nominateModal = document.getElementById("nominate-modal");
 
             window.openModal = function () { spotModal.classList.add("show"); };
-            window.closeModal = function () { spotModal.classList.remove("show"); };
-            spotModal.addEventListener("click", function (e) { if (e.target === spotModal) closeModal(); });
-
-            const sessionDetails = {
-                deepak: "<h3>September - Center Meetings & Risk Association</h3><p><strong>Deepak Pandey</strong> shared his deep understanding of Center Meetings & Risk Association. His session helped us recognize the crucial role that center meetings play in ensuring financial discipline, customer engagement, and risk mitigation.</p>",
-                shashi: "<h3>October - Importance of Communication in Team Cohesion</h3><p><strong>Shashi</strong> brought an essential soft skills session on how communication is the glue that holds teams together, using engaging discussions and real-world examples.</p>",
-                birti: "<h3>November - Emotional Intelligence</h3><p><strong>Birti Sundar</strong> emphasized how understanding and managing emotions can lead to better leadership, decision-making, and workplace harmony.</p>",
-                parthiban: "<h3>December - SPOT Session on Audit</h3><p><strong>Parthiban</strong> shed light on key audit checkpoints, best practices, and common pitfalls, reinforcing the importance of precision and integrity.</p>",
-                "vishal-past": "<h3>January - Canva Training</h3><p><strong>Vishal</strong> introduced us to Canva, unlocking new skills for designing engaging presentations and reports.</p>",
-                bichhanda: "<h3>February - Webshakti & M Shakti</h3><p><strong>Bichhanda</strong> guided us through Webshakti & M Shakti, enhancing our ability to streamline processes with these digital tools.</p>",
-                "vishal-upcoming": "<h3>March 11 - Canva Training (Upcoming)</h3><p><strong>Vishal Nandan Tiwari</strong> returns on March 11, 2025, at 3:00 PM IST to deepen our Canva skills for creating stunning visual content!</p>",
-                amit: "<h3>March 24 - Topic TBD (Upcoming)</h3><p><strong>Amit Pandey</strong> will present on March 24, 2025. Stay tuned for the topic and time details!</p>"
-            };
-
-            window.showCelebration = function (trainer) {
-                document.getElementById("celebration-content").innerHTML = sessionDetails[trainer] || "<h3>Details Coming Soon</h3><p>Stay tuned for more information!</p>";
-                celebrationModal.classList.add("show");
-                startConfetti();
-            };
-            window.closeCelebration = function () { celebrationModal.classList.remove("show"); stopConfetti(); };
-            celebrationModal.addEventListener("click", function (e) { if (e.target === celebrationModal) closeCelebration(); });
-
-            let confettiInterval;
-            function startConfetti() {
-                const canvas = document.getElementById("confetti-canvas");
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                confettiInterval = setInterval(() => {
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF4500', '#00FF00'] });
-                }, 500);
-            }
-            function stopConfetti() { clearInterval(confettiInterval); confetti.reset(); }
-
-            window.openFeedback = function () { feedbackModal.classList.add("show"); };
-            window.closeFeedback = function () { feedbackModal.classList.remove("show"); document.getElementById("feedback-text").value = ""; };
-            feedbackModal.addEventListener("click", function (e) { if (e.target === feedbackModal) closeFeedback(); });
-
-            window.submitFeedback = function () {
-                const feedback = document.getElementById("feedback-text").value.trim();
-                if (feedback) {
-                    if (confirm("Submit feedback via email?")) {
-                        const subject = encodeURIComponent("SPOT Session Feedback");
-                        const body = encodeURIComponent(feedback);
-                        window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
-                        closeFeedback();
-                    }
-                } else {
-                    alert("Please enter your feedback before submitting!");
-                }
-            };
-
-            window.openCalendar = function () {
-                generateCalendar();
-                calendarModal.classList.add("show");
-            };
-            window.closeCalendar = function () { calendarModal.classList.remove("show"); };
-            calendarModal.addEventListener("click", function (e) { if (e.target === calendarModal) closeCalendar(); });
-
-            function generateCalendar() {
-                const calendar = document.getElementById("calendar");
-                calendar.innerHTML = "";
-                const daysInMonth = 31; // March 2025
-                const firstDay = new Date(2025, 2, 1).getDay(); // March 1st, 2025 is a Saturday (6)
-                for (let i = 0; i < firstDay; i++) {
-                    calendar.innerHTML += '<div class="calendar-day"></div>';
-                }
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const isEventDay = (day === 11 || day === 24); // Events on March 11 and 24
-                    calendar.innerHTML += `<div class="calendar-day ${isEventDay ? 'event' : ''}">${day}</div>`;
-                }
-            }
-
-            window.openUpcoming = function () { upcomingModal.classList.add("show"); };
-            window.closeUpcoming = function () { upcomingModal.classList.remove("show"); };
-            upcomingModal.addEventListener("click", function (e) { if (e.target === upcomingModal) closeUpcoming(); });
-
-            // Countdown Timer for Vishal's session (March 11, 2025, 3:00 PM IST)
-            const countdownDate = new Date("March 11, 2025 15:00:00 GMT+0530").getTime();
-            const updateCountdown = setInterval(() => {
-                const now = new Date().getTime();
-                const distance = countdownDate - now;
-                if (distance < 0) {
-                    clearInterval(updateCountdown);
-                    document.querySelector(".countdown-container").innerHTML = "<div class='countdown-title'>Vishal's Session Started!</div>";
-                    return;
-                }
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                document.getElementById("days").textContent = days.toString().padStart(2, "0");
-                document.getElementById("hours").textContent = hours.toString().padStart(2, "0");
-                document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
-                document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
-            }, 1000);
-        });
-    </script>
-</body>
-</html>
+            window.closeModal = function () {
