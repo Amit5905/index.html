@@ -14,6 +14,7 @@
             --light-color: #f5f7fa;
             --success-color: #2ecc71;
             --warning-color: #f39c12;
+            --cool-color: #00ced1;
         }
 
         * {
@@ -120,8 +121,10 @@
             width: 100%;
         }
 
-        #vishal-link { color: #ffa500; }
-        #amit-link { color: #00ced1; }
+        .cool-presenter {
+            color: var(--cool-color);
+            font-size: 1.2em;
+        }
 
         .button {
             display: inline-block;
@@ -270,23 +273,25 @@
             .spot-features { flex-direction: column; align-items: center; }
             .nav-buttons { flex-direction: column; }
         }
+
+        form input, form textarea, form select { width: 100%; margin: 10px 0; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+        form textarea { height: 100px; resize: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                Fusion Finance LTD
-            </div>
+            <div class="logo">Fusion Finance LTD</div>
             <div class="nav-buttons">
                 <a href="#" class="button primary" onclick="openCalendar()"><i class="fas fa-calendar-alt"></i> Calendar</a>
                 <a class="button accent" id="join-now-top" href="https://teams.microsoft.com/l/meetup-join/19%3ameeting_Y2FiOTkyYjAtNjFjMS00OTY4LThlMDQtNDEzNDJjYTM1N2Q5%40thread.v2/0?context=%7b%22Tid%22%3a%22cb91b281-3ea4-4888-b449-f587ba2f84ae%22%2c%22Oid%22%3a%22e1907a32-fbc8-438d-b13f-f819918f897c%22%7d" target="_blank">
                     <i class="fas fa-video"></i> Join Now
                 </a>
+                <a href="#" class="button warning" onclick="openAdmin()"><i class="fas fa-user-shield"></i> Admin</a>
             </div>
         </header>
 
-        <h1>Upcoming SPOT Presenters: <a href="#" id="amit-link" class="presenter-link" onclick="showCelebration('amit')">Amit Pandey</a> & <a href="#" id="vishal-link" class="presenter-link" onclick="showCelebration('vishal-upcoming')">Vishal Nandan Tiwari</a></h1>
+        <h1 id="next-presenter"></h1>
 
         <div class="social-buttons">
             <a class="button success" id="whatsapp-button" href="https://wa.me/917869647238" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
@@ -316,31 +321,26 @@
         <a class="button accent" id="feedback-button" href="#" onclick="openFeedback()"><i class="fas fa-comment-dots"></i> Feedback</a>
     </div>
 
+    <!-- Past Sessions Modal -->
     <div id="spot-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal()"><i class="fas fa-times"></i></span>
             <h2>Fusion Finance Knowledge Series: A Journey of Learning & Growth</h2>
-            <p>At Fusion Finance LTD, learning never stops! Over the past few months, our knowledge-sharing sessions have been nothing short of insightful, empowering us with practical wisdom from our very own team members. Let’s take a moment to appreciate and reflect on these sessions that have enriched our professional journey.</p>
+            <p>At Fusion Finance LTD, learning never stops! Over the past few months, our knowledge-sharing sessions have been insightful, empowering us with practical wisdom from our team members.</p>
             <h3>Past Session Highlights</h3>
-            <ul style="list-style: none; padding: 0;">
-                <li><span class="month-name">September</span> - <a href="#" onclick="showCelebration('deepak')" class="trainer-link">Deepak Pandey</a></li>
-                <li><span class="month-name">October</span> - <a href="#" onclick="showCelebration('shashi')" class="trainer-link">Shashi</a></li>
-                <li><span class="month-name">November</span> - <a href="#" onclick="showCelebration('birti')" class="trainer-link">Birti Sundar</a></li>
-                <li><span class="month-name">December</span> - <a href="#" onclick="showCelebration('parthiban')" class="trainer-link">Parthiban</a></li>
-                <li><span class="month-name">January</span> - <a href="#" onclick="showCelebration('vishal-past')" class="trainer-link">Vishal</a></li>
-                <li><span class="month-name">February</span> - <a href="#" onclick="showCelebration('bichhanda')" class="trainer-link">Bichhanda</a></li>
-            </ul>
+            <ul id="past-sessions-list" style="list-style: none; padding: 0;"></ul>
             <div class="session-count">
-                <strong>Total SPOT Sessions Completed: 6</strong><br>
+                <strong id="total-sessions"></strong><br>
                 <em>A Milestone in Our Learning Odyssey - More to Come!</em>
             </div>
             <hr>
-            <p><strong>A Round of Applause!</strong><br>A huge thank you to all our speakers for their dedication and for sharing their knowledge with us! Each session has contributed to our collective growth, making us more skilled, aware, and prepared for the challenges ahead.</p>
-            <p>Let’s continue this journey of learning, collaborating, and excelling together. Looking forward to many more insightful sessions in the future!</p>
+            <p><strong>A Round of Applause!</strong><br>A huge thank you to all our speakers for their dedication and for sharing their knowledge with us!</p>
+            <p>Let’s continue this journey of learning, collaborating, and excelling together.</p>
             <p><em>Keep learning, keep growing!</em></p>
         </div>
     </div>
 
+    <!-- Celebration Modal -->
     <div id="celebration-modal" class="modal">
         <div class="modal-content celebration-modal">
             <span class="close" onclick="closeCelebration()"><i class="fas fa-times"></i></span>
@@ -349,6 +349,7 @@
         </div>
     </div>
 
+    <!-- Feedback Modal -->
     <div id="feedback-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeFeedback()"><i class="fas fa-times"></i></span>
@@ -359,30 +360,26 @@
         </div>
     </div>
 
+    <!-- Calendar Modal -->
     <div id="calendar-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeCalendar()"><i class="fas fa-times"></i></span>
-            <h3>March 2025 Calendar</h3>
+            <h3>Calendar</h3>
             <div class="calendar" id="calendar"></div>
         </div>
     </div>
 
+    <!-- Upcoming Sessions Modal -->
     <div id="upcoming-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeUpcoming()"><i class="fas fa-times"></i></span>
             <h3>Upcoming SPOT Sessions</h3>
-            <p>Get ready for these exciting sessions in March and April 2025!</p>
-            <div class="schedule-card">
-                <h4>Amit Pandey - Topic TBD</h4>
-                <p><span class="date">Date:</span> March 21, 2025<br><span class="date">Time:</span> TBD<br>Amit will bring fresh insights to our learning journey. Stay tuned for more details!</p>
-            </div>
-            <div class="schedule-card">
-                <h4>Vishal Nandan Tiwari - Canva Training</h4>
-                <p><span class="date">Date:</span> April 11, 2025<br><span class="date">Time:</span> 3:00 PM IST<br>Vishal returns with another engaging session on Canva, helping you master design skills for professional presentations and reports.</p>
-            </div>
+            <p>Get ready for these exciting sessions in 2025!</p>
+            <div id="upcoming-sessions"></div>
         </div>
     </div>
 
+    <!-- Nominate Modal -->
     <div id="nominate-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeNominate()"><i class="fas fa-times"></i></span>
@@ -397,117 +394,43 @@
         </div>
     </div>
 
-    <footer>
-        © 2025 Fusion Finance LTD. All rights reserved.
-    </footer>
+    <!-- Admin Modal -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAdmin()"><i class="fas fa-times"></i></span>
+            <h3>Admin Panel</h3>
+            <button onclick="openAddPastSession()" class="button primary">Add Past Session</button>
+            <button onclick="openAddUpcomingSession()" class="button primary">Add Upcoming Session</button>
+            <button onclick="openUpdatePastSession()" class="button warning">Update Past Session</button>
+            <button onclick="openUpdateUpcomingSession()" class="button warning">Update Upcoming Session</button>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const spotModal = document.getElementById("spot-modal");
-            const celebrationModal = document.getElementById("celebration-modal");
-            const feedbackModal = document.getElementById("feedback-modal");
-            const calendarModal = document.getElementById("calendar-modal");
-            const upcomingModal = document.getElementById("upcoming-modal");
-            const nominateModal = document.getElementById("nominate-modal");
+    <!-- Add Past Session Modal -->
+    <div id="add-past-session-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddPastSession()"><i class="fas fa-times"></i></span>
+            <h3>Add Past Session</h3>
+            <form id="add-past-session-form">
+                <input type="text" id="past-name" placeholder="Presenter Name" required>
+                <input type="text" id="past-month" placeholder="Month (e.g., March)" required>
+                <input type="text" id="past-topic" placeholder="Topic" required>
+                <textarea id="past-description" placeholder="Description" required></textarea>
+                <button type="submit" class="button success">Add Session</button>
+            </form>
+        </div>
+    </div>
 
-            window.openModal = function () { spotModal.classList.add("show"); };
-            window.closeModal = function () { spotModal.classList.remove("show"); };
-            spotModal.addEventListener("click", function (e) { if (e.target === spotModal) closeModal(); });
-
-            const sessionDetails = {
-                deepak: "<h3>September - Center Meetings & Risk Association</h3><p><strong>Deepak Pandey</strong> shared his deep understanding of Center Meetings & Risk Association. His session helped us recognize the crucial role that center meetings play in ensuring financial discipline, customer engagement, and risk mitigation.</p>",
-                shashi: "<h3>October - Importance of Communication in Team Cohesion</h3><p><strong>Shashi</strong> brought an essential soft skills session on how communication is the glue that holds teams together, using engaging discussions and real-world examples.</p>",
-                birti: "<h3>November - Emotional Intelligence</h3><p><strong>Birti Sundar</strong> emphasized how understanding and managing emotions can lead to better leadership, decision-making, and workplace harmony.</p>",
-                parthiban: "<h3>December - SPOT Session on Audit</h3><p><strong>Parthiban</strong> shed light on key audit checkpoints, best practices, and common pitfalls, reinforcing the importance of precision and integrity.</p>",
-                "vishal-past": "<h3>January - Canva Training</h3><p><strong>Vishal</strong> introduced us to Canva, unlocking new skills for designing engaging presentations and reports.</p>",
-                bichhanda: "<h3>February - Webshakti & M Shakti</h3><p><strong>Bichhanda</strong> guided us through Webshakti & M Shakti, enhancing our ability to streamline processes with these digital tools.</p>",
-                     Amit Pandey: "<h3>March - SPOT Session on Story Telling</h3><p><strong>Amit Pandey</strong> shed light on key Story Telling, best practic.</p>",
-                "vishal-upcoming": "<h3>April - Canva Training (Upcoming)</h3><p><strong>Vishal Nandan Tiwari</strong> returns on April, 2025, at 3:00 PM IST to deepen our Canva skills for creating stunning visual content!</p>",
-            };
-
-            window.showCelebration = function (trainer) {
-                document.getElementById("celebration-content").innerHTML = sessionDetails[trainer] || "<h3>Details Coming Soon</h3><p>Stay tuned for more information!</p>";
-                celebrationModal.classList.add("show");
-                startConfetti();
-            };
-            window.closeCelebration = function () { celebrationModal.classList.remove("show"); stopConfetti(); };
-            celebrationModal.addEventListener("click", function (e) { if (e.target === celebrationModal) closeCelebration(); });
-
-            let confettiInterval;
-            function startConfetti() {
-                const canvas = document.getElementById("confetti-canvas");
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                confettiInterval = setInterval(() => {
-                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF4500', '#00FF00'] });
-                }, 500);
-            }
-            function stopConfetti() { clearInterval(confettiInterval); confetti.reset(); }
-
-            window.openFeedback = function () { feedbackModal.classList.add("show"); };
-            window.closeFeedback = function () { feedbackModal.classList.remove("show"); document.getElementById("feedback-text").value = ""; };
-            feedbackModal.addEventListener("click", function (e) { if (e.target === feedbackModal) closeFeedback(); });
-
-            window.submitFeedback = function () {
-                const feedback = document.getElementById("feedback-text").value.trim();
-                if (feedback) {
-                    if (confirm("Submit feedback via email?")) {
-                        const subject = encodeURIComponent("SPOT Session Feedback");
-                        const body = encodeURIComponent(feedback);
-                        window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
-                        closeFeedback();
-                    }
-                } else {
-                    alert("Please enter your feedback before submitting!");
-                }
-            };
-
-            window.openCalendar = function () {
-                generateCalendar();
-                calendarModal.classList.add("show");
-            };
-            window.closeCalendar = function () { calendarModal.classList.remove("show"); };
-            calendarModal.addEventListener("click", function (e) { if (e.target === calendarModal) closeCalendar(); });
-
-            function generateCalendar() {
-                const calendar = document.getElementById("calendar");
-                calendar.innerHTML = "";
-                const daysInMonth = 31; // March 2025
-                const firstDay = new Date(2025, 2, 1).getDay(); // March 1st, 2025 is a Saturday (6)
-                for (let i = 0; i < firstDay; i++) {
-                    calendar.innerHTML += '<div class="calendar-day"></div>';
-                }
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const isEventDay = (day === 24); // Event on March 24
-                    calendar.innerHTML += `<div class="calendar-day ${isEventDay ? 'event' : ''}">${day}</div>`;
-                }
-            }
-
-            window.openUpcoming = function () { upcomingModal.classList.add("show"); };
-            window.closeUpcoming = function () { upcomingModal.classList.remove("show"); };
-            upcomingModal.addEventListener("click", function (e) { if (e.target === upcomingModal) closeUpcoming(); });
-
-            window.openNominate = function () { nominateModal.classList.add("show"); };
-            window.closeNominate = function () { nominateModal.classList.remove("show"); };
-            nominateModal.addEventListener("click", function (e) { if (e.target === nominateModal) closeNominate(); });
-
-            document.getElementById("nominate-form").addEventListener("submit", function (e) {
-                e.preventDefault();
-                const name = document.getElementById("name").value.trim();
-                const employeeCode = document.getElementById("employee-code").value.trim();
-                const topic = document.getElementById("topic").value.trim();
-
-                if (name && employeeCode && topic) {
-                    const subject = encodeURIComponent("SPOT Session Nomination");
-                    const body = encodeURIComponent(`Name: ${name}\nEmployee Code: ${employeeCode}\nTopic: ${topic}`);
-                    window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
-                    closeNominate();
-                } else {
-                    alert("Please fill out all fields before submitting!");
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+    <!-- Add Upcoming Session Modal -->
+    <div id="add-upcoming-session-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddUpcomingSession()"><i class="fas fa-times"></i></span>
+            <h3>Add Upcoming Session</h3>
+            <form id="add-upcoming-session-form">
+                <input type="text" id="upcoming-name" placeholder="Presenter Name" required>
+                <input type="text" id="upcoming-month" placeholder="Month (e.g., April)" required>
+                <input type="text" id="upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
+                <input type="text" id="upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
+                <input type="text" id="upcoming-topic" placeholder="Topic" required>
+                <textarea id="upcoming-description" placeholder="Description" required></textarea>
+                <button type="submit" class="button success">Add
