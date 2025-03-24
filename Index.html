@@ -433,4 +433,368 @@
                 <input type="text" id="upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="upcoming-topic" placeholder="Topic" required>
                 <textarea id="upcoming-description" placeholder="Description" required></textarea>
-                <button type="submit" class="button success">Add
+                <button type="submit" class="button success">Add Session</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Past Session Modal -->
+    <div id="update-past-session-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdatePastSession()"><i class="fas fa-times"></i></span>
+            <h3>Update Past Session</h3>
+            <form id="update-past-session-form">
+                <select id="past-session-select" required onchange="populatePastSessionFields()">
+                    <option value="">Select a session to update</option>
+                </select>
+                <input type="text" id="update-past-name" placeholder="Presenter Name" required>
+                <input type="text" id="update-past-month" placeholder="Month (e.g., March)" required>
+                <input type="text" id="update-past-topic" placeholder="Topic" required>
+                <textarea id="update-past-description" placeholder="Description" required></textarea>
+                <button type="submit" class="button success">Update Session</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Upcoming Session Modal -->
+    <div id="update-upcoming-session-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateUpcomingSession()"><i class="fas fa-times"></i></span>
+            <h3>Update Upcoming Session</h3>
+            <form id="update-upcoming-session-form">
+                <select id="upcoming-session-select" required onchange="populateUpcomingSessionFields()">
+                    <option value="">Select a session to update</option>
+                </select>
+                <input type="text" id="update-upcoming-name" placeholder="Presenter Name" required>
+                <input type="text" id="update-upcoming-month" placeholder="Month (e.g., April)" required>
+                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
+                <input type="text" id="update-upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
+                <input type="text" id="update-upcoming-topic" placeholder="Topic" required>
+                <textarea id="update-upcoming-description" placeholder="Description" required></textarea>
+                <button type="submit" class="button success">Update Session</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        © 2025 Fusion Finance LTD. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const pastSessions = [
+                { name: "Deepak Pandey", month: "September", topic: "Center Meetings & Risk Association", description: "shared his deep understanding of Center Meetings & Risk Association..." },
+                { name: "Shashi", month: "October", topic: "Importance of Communication in Team Cohesion", description: "brought an essential soft skills session..." },
+                { name: "Birti Sundar", month: "November", topic: "Emotional Intelligence", description: "emphasized how understanding and managing emotions..." },
+                { name: "Parthiban", month: "December", topic: "SPOT Session on Audit", description: "shed light on key audit checkpoints..." },
+                { name: "Vishal", month: "January", topic: "Canva Training", description: "introduced us to Canva..." },
+                { name: "Bichhanda", month: "February", topic: "Webshakti & M Shakti", description: "guided us through Webshakti & M Shakti..." },
+                { name: "Amit Pandey", month: "March", topic: "Storytelling", description: "delivered an engaging session on the art of storytelling..." }
+            ];
+
+            const upcomingSessions = [
+                { name: "Vishal Nandan Tiwari", month: "April", date: "April 11, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills..." },
+                { name: "Shaikh Nayeem", month: "May", date: "May 9, 2025", time: "TBD", topic: "Audit Pointers", description: "will share valuable insights on audit pointers..." },
+                { name: "Nitesh Kushwaha", month: "June", date: "June 13, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations..." },
+                { name: "Satguru Singh", month: "July", date: "July 11, 2025", time: "TBD", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged..." }
+            ];
+
+            const sessionDetails = {};
+            pastSessions.forEach(session => {
+                const key = session.name.toLowerCase().replace(/\s+/g, '-');
+                sessionDetails[key] = `<h3>${session.month} - ${session.topic}</h3><p><strong>${session.name}</strong> ${session.description}</p>`;
+            });
+            upcomingSessions.forEach(session => {
+                const key = session.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                sessionDetails[key] = `<h3>${session.date} - ${session.topic} (Upcoming)</h3><p><strong>${session.name}</strong> will present on ${session.date} at ${session.time}. ${session.description}</p>`;
+            });
+
+            const nextPresenterElement = document.getElementById("next-presenter");
+            if (upcomingSessions.length > 0) {
+                const nextPresenter = upcomingSessions[0];
+                const nextKey = nextPresenter.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                nextPresenterElement.innerHTML = `Next SPOT Presenter: <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${nextKey}')">${nextPresenter.name}</a> (${nextPresenter.month})`;
+            } else {
+                nextPresenterElement.textContent = "No upcoming SPOT sessions scheduled.";
+            }
+
+            const pastSessionsList = document.getElementById("past-sessions-list");
+            pastSessions.forEach(session => {
+                const li = document.createElement("li");
+                li.innerHTML = `<span class="month-name">${session.month}</span> - <a href="#" class="trainer-link" onclick="showCelebration('${session.name.toLowerCase().replace(/\s+/g, '-')}')">${session.name}</a>`;
+                pastSessionsList.appendChild(li);
+            });
+            document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
+
+            const upcomingSessionsContainer = document.getElementById("upcoming-sessions");
+            upcomingSessions.forEach(session => {
+                const card = document.createElement("div");
+                card.className = "schedule-card";
+                card.innerHTML = `
+                    <h4>${session.name} - ${session.topic}</h4>
+                    <p><span class="date">Date:</span> ${session.date}<br><span class="date">Time:</span> ${session.time}<br>${session.description}</p>
+                `;
+                upcomingSessionsContainer.appendChild(card);
+            });
+
+            const spotModal = document.getElementById("spot-modal");
+            window.openModal = () => spotModal.classList.add("show");
+            window.closeModal = () => spotModal.classList.remove("show");
+            spotModal.addEventListener("click", e => { if (e.target === spotModal) closeModal(); });
+
+            const celebrationModal = document.getElementById("celebration-modal");
+            window.showCelebration = trainer => {
+                document.getElementById("celebration-content").innerHTML = sessionDetails[trainer] || "<h3>Details Coming Soon</h3><p>Stay tuned!</p>";
+                celebrationModal.classList.add("show");
+                startConfetti();
+            };
+            window.closeCelebration = () => { celebrationModal.classList.remove("show"); stopConfetti(); };
+            celebrationModal.addEventListener("click", e => { if (e.target === celebrationModal) closeCelebration(); });
+
+            let confettiInterval;
+            function startConfetti() {
+                const canvas = document.getElementById("confetti-canvas");
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                confettiInterval = setInterval(() => {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#FFD700', '#FF4500', '#00FF00'] });
+                }, 500);
+            }
+            function stopConfetti() { clearInterval(confettiInterval); confetti.reset(); }
+
+            const feedbackModal = document.getElementById("feedback-modal");
+            window.openFeedback = () => feedbackModal.classList.add("show");
+            window.closeFeedback = () => { feedbackModal.classList.remove("show"); document.getElementById("feedback-text").value = ""; };
+            feedbackModal.addEventListener("click", e => { if (e.target === feedbackModal) closeFeedback(); });
+
+            window.submitFeedback = () => {
+                const feedback = document.getElementById("feedback-text").value.trim();
+                if (feedback) {
+                    if (confirm("Submit feedback via email?")) {
+                        const subject = encodeURIComponent("SPOT Session Feedback");
+                        const body = encodeURIComponent(feedback);
+                        window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
+                        closeFeedback();
+                    }
+                } else {
+                    alert("Please enter your feedback before submitting!");
+                }
+            };
+
+            const calendarModal = document.getElementById("calendar-modal");
+            window.openCalendar = () => calendarModal.classList.add("show");
+            window.closeCalendar = () => calendarModal.classList.remove("show");
+            calendarModal.addEventListener("click", e => { if (e.target === calendarModal) closeCalendar(); });
+
+            const upcomingModal = document.getElementById("upcoming-modal");
+            window.openUpcoming = () => upcomingModal.classList.add("show");
+            window.closeUpcoming = () => upcomingModal.classList.remove("show");
+            upcomingModal.addEventListener("click", e => { if (e.target === upcomingModal) closeUpcoming(); });
+
+            const nominateModal = document.getElementById("nominate-modal");
+            window.openNominate = () => nominateModal.classList.add("show");
+            window.closeNominate = () => nominateModal.classList.remove("show");
+            nominateModal.addEventListener("click", e => { if (e.target === nominateModal) closeNominate(); });
+
+            document.getElementById("nominate-form").addEventListener("submit", e => {
+                e.preventDefault();
+                const name = document.getElementById("name").value.trim();
+                const employeeCode = document.getElementById("employee-code").value.trim();
+                const topic = document.getElementById("topic").value.trim();
+                if (name && employeeCode && topic) {
+                    const subject = encodeURIComponent("SPOT Session Nomination");
+                    const body = encodeURIComponent(`Name: ${name}\nEmployee Code: ${employeeCode}\nTopic: ${topic}`);
+                    window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
+                    closeNominate();
+                } else {
+                    alert("Please fill out all fields before submitting!");
+                }
+            });
+
+            const adminModal = document.getElementById("admin-modal");
+            const addPastModal = document.getElementById("add-past-session-modal");
+            const addUpcomingModal = document.getElementById("add-upcoming-session-modal");
+            const updatePastModal = document.getElementById("update-past-session-modal");
+            const updateUpcomingModal = document.getElementById("update-upcoming-session-modal");
+            const adminPassword = "Mahendra5*";
+
+            window.openAdmin = () => {
+                const enteredPassword = prompt("Enter admin password:");
+                if (enteredPassword === adminPassword) {
+                    adminModal.classList.add("show");
+                } else {
+                    alert("Incorrect password. Access denied.");
+                }
+            };
+            window.closeAdmin = () => adminModal.classList.remove("show");
+            window.openAddPastSession = () => { closeAdmin(); addPastModal.classList.add("show"); };
+            window.closeAddPastSession = () => { addPastModal.classList.remove("show"); document.getElementById("add-past-session-form").reset(); };
+            window.openAddUpcomingSession = () => { closeAdmin(); addUpcomingModal.classList.add("show"); };
+            window.closeAddUpcomingSession = () => { addUpcomingModal.classList.remove("show"); document.getElementById("add-upcoming-session-form").reset(); };
+            window.openUpdatePastSession = () => { closeAdmin(); populatePastSessionDropdown(); updatePastModal.classList.add("show"); };
+            window.closeUpdatePastSession = () => { updatePastModal.classList.remove("show"); document.getElementById("update-past-session-form").reset(); };
+            window.openUpdateUpcomingSession = () => { closeAdmin(); populateUpcomingSessionDropdown(); updateUpcomingModal.classList.add("show"); };
+            window.closeUpdateUpcomingSession = () => { updateUpcomingModal.classList.remove("show"); document.getElementById("update-upcoming-session-form").reset(); };
+
+            adminModal.addEventListener("click", e => { if (e.target === adminModal) closeAdmin(); });
+            addPastModal.addEventListener("click", e => { if (e.target === addPastModal) closeAddPastSession(); });
+            addUpcomingModal.addEventListener("click", e => { if (e.target === addUpcomingModal) closeAddUpcomingSession(); });
+            updatePastModal.addEventListener("click", e => { if (e.target === updatePastModal) closeUpdatePastSession(); });
+            updateUpcomingModal.addEventListener("click", e => { if (e.target === updateUpcomingModal) closeUpdateUpcomingSession(); });
+
+            document.getElementById("add-past-session-form").addEventListener("submit", e => {
+                e.preventDefault();
+                const name = document.getElementById("past-name").value.trim();
+                const month = document.getElementById("past-month").value.trim();
+                const topic = document.getElementById("past-topic").value.trim();
+                const description = document.getElementById("past-description").value.trim();
+                if (name && month && topic && description) {
+                    const key = name.toLowerCase().replace(/\s+/g, '-');
+                    pastSessions.push({ name, month, topic, description });
+                    sessionDetails[key] = `<h3>${month} - ${topic}</h3><p><strong>${name}</strong> ${description}</p>`;
+                    const li = document.createElement("li");
+                    li.innerHTML = `<span class="month-name">${month}</span> - <a href="#" class="trainer-link" onclick="showCelebration('${key}')">${name}</a>`;
+                    pastSessionsList.appendChild(li);
+                    document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
+                    closeAddPastSession();
+                } else {
+                    alert("Please fill out all fields.");
+                }
+            });
+
+            document.getElementById("add-upcoming-session-form").addEventListener("submit", e => {
+                e.preventDefault();
+                const name = document.getElementById("upcoming-name").value.trim();
+                const month = document.getElementById("upcoming-month").value.trim();
+                const date = document.getElementById("upcoming-date").value.trim();
+                const time = document.getElementById("upcoming-time").value.trim();
+                const topic = document.getElementById("upcoming-topic").value.trim();
+                const description = document.getElementById("upcoming-description").value.trim();
+                if (name && month && date && time && topic && description) {
+                    const key = name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                    upcomingSessions.push({ name, month, date, time, topic, description });
+                    sessionDetails[key] = `<h3>${date} - ${topic} (Upcoming)</h3><p><strong>${name}</strong> will present on ${date} at ${time}. ${description}</p>`;
+                    const card = document.createElement("div");
+                    card.className = "schedule-card";
+                    card.innerHTML = `
+                        <h4>${name} - ${topic}</h4>
+                        <p><span class="date">Date:</span> ${date}<br><span class="date">Time:</span> ${time}<br>${description}</p>
+                    `;
+                    upcomingSessionsContainer.appendChild(card);
+                    if (upcomingSessions.length === 1) {
+                        nextPresenterElement.innerHTML = `Next SPOT Presenter: <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${key}')">${name}</a> (${month})`;
+                    }
+                    closeAddUpcomingSession();
+                } else {
+                    alert("Please fill out all fields.");
+                }
+            });
+
+            function populatePastSessionDropdown() {
+                const select = document.getElementById("past-session-select");
+                select.innerHTML = '<option value="">Select a session to update</option>';
+                pastSessions.forEach((session, index) => {
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.textContent = `${session.name} - ${session.topic} (${session.month})`;
+                    select.appendChild(option);
+                });
+            }
+
+            function populateUpcomingSessionDropdown() {
+                const select = document.getElementById("upcoming-session-select");
+                select.innerHTML = '<option value="">Select a session to update</option>';
+                upcomingSessions.forEach((session, index) => {
+                    const option = document.createElement("option");
+                    option.value = index;
+                    option.textContent = `${session.name} - ${session.topic} (${session.date})`;
+                    select.appendChild(option);
+                });
+            }
+
+            function populatePastSessionFields() {
+                const select = document.getElementById("past-session-select");
+                const index = select.value;
+                if (index === "") return;
+                const session = pastSessions[index];
+                document.getElementById("update-past-name").value = session.name;
+                document.getElementById("update-past-month").value = session.month;
+                document.getElementById("update-past-topic").value = session.topic;
+                document.getElementById("update-past-description").value = session.description;
+            }
+
+            function populateUpcomingSessionFields() {
+                const select = document.getElementById("upcoming-session-select");
+                const index = select.value;
+                if (index === "") return;
+                const session = upcomingSessions[index];
+                document.getElementById("update-upcoming-name").value = session.name;
+                document.getElementById("update-upcoming-month").value = session.month;
+                document.getElementById("update-upcoming-date").value = session.date;
+                document.getElementById("update-upcoming-time").value = session.time;
+                document.getElementById("update-upcoming-topic").value = session.topic;
+                document.getElementById("update-upcoming-description").value = session.description;
+            }
+
+            document.getElementById("update-past-session-form").addEventListener("submit", e => {
+                e.preventDefault();
+                const index = document.getElementById("past-session-select").value;
+                if (index === "") {
+                    alert("Please select a session to update.");
+                    return;
+                }
+                const name = document.getElementById("update-past-name").value.trim();
+                const month = document.getElementById("update-past-month").value.trim();
+                const topic = document.getElementById("update-past-topic").value.trim();
+                const description = document.getElementById("update-past-description").value.trim();
+                if (name && month && topic && description) {
+                    const oldSession = pastSessions[index];
+                    const oldKey = oldSession.name.toLowerCase().replace(/\s+/g, '-');
+                    pastSessions[index] = { name, month, topic, description };
+                    const newKey = name.toLowerCase().replace(/\s+/g, '-');
+                    delete sessionDetails[oldKey];
+                    sessionDetails[newKey] = `<h3>${month} - ${topic}</h3><p><strong>${name}</strong> ${description}</p>`;
+                    pastSessionsList.children[index].innerHTML = `<span class="month-name">${month}</span> - <a href="#" class="trainer-link" onclick="showCelebration('${newKey}')">${name}</a>`;
+                    closeUpdatePastSession();
+                } else {
+                    alert("Please fill out all fields.");
+                }
+            });
+
+            document.getElementById("update-upcoming-session-form").addEventListener("submit", e => {
+                e.preventDefault();
+                const index = document.getElementById("upcoming-session-select").value;
+                if (index === "") {
+                    alert("Please select a session to update.");
+                    return;
+                }
+                const name = document.getElementById("update-upcoming-name").value.trim();
+                const month = document.getElementById("upcoming-month").value.trim();
+                const date = document.getElementById("upcoming-date").value.trim();
+                const time = document.getElementById("upcoming-time").value.trim();
+                const topic = document.getElementById("update-upcoming-topic").value.trim();
+                const description = document.getElementById("update-upcoming-description").value.trim();
+                if (name && month && date && time && topic && description) {
+                    const oldSession = upcomingSessions[index];
+                    const oldKey = oldSession.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                    upcomingSessions[index] = { name, month, date, time, topic, description };
+                    const newKey = name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                    delete sessionDetails[oldKey];
+                    sessionDetails[newKey] = `<h3>${date} - ${topic} (Upcoming)</h3><p><strong>${name}</strong> will present on ${date} at ${time}. ${description}</p>`;
+                    upcomingSessionsContainer.children[index].innerHTML = `
+                        <h4>${name} - ${topic}</h4>
+                        <p><span class="date">Date:</span> ${date}<br><span class="date">Time:</span> ${time}<br>${description}</p>
+                    `;
+                    if (index == 0) {
+                        nextPresenterElement.innerHTML = `Next SPOT Presenter: <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${newKey}')">${name}</a> (${month})`;
+                    }
+                    closeUpdateUpcomingSession();
+                } else {
+                    alert("Please fill out all fields.");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
