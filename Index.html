@@ -6,6 +6,7 @@
     <title>SPOT Session | Fusion Finance LTD</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
     <style>
         :root {
             --primary-color: #3a7bd5;
@@ -424,24 +425,56 @@
             text-align: center;
         }
 
-        .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-            margin-top: 20px;
+        .calendar-controls {
+            margin: 10px 0;
         }
 
-        .calendar-day {
-            padding: 10px;
-            background: #f0f0f0;
+        .calendar-controls input[type="date"],
+        .calendar-controls select {
+            padding: 8px;
+            font-size: 1rem;
             border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+
+        .trainer-activities {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .trainer-activity {
+            background: rgba(255, 255, 255, 0.9);
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .trainer-activity h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .trainer-activity p {
             color: #333;
         }
 
-        .calendar-day.event {
-            background: var(--primary-color);
-            color: white;
+        .trainer-activity a {
+            display: inline-block;
+            margin-top: 10px;
+            color: var(--primary-color);
+            text-decoration: none;
             font-weight: bold;
+        }
+
+        .trainer-activity a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
         }
 
         #upcoming-modal .modal-content {
@@ -662,8 +695,15 @@
     <div id="calendar-modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeCalendar()"><i class="fas fa-times"></i></span>
-            <h3>Calendar</h3>
-            <div class="calendar" id="calendar"></div>
+            <h3>Trainer Activities Calendar</h3>
+            <div class="calendar-controls">
+                <input type="date" id="datePicker" onchange="showActivities()">
+                <select id="trainerSelect" onchange="showActivities()">
+                    <option value="">Select a Trainer</option>
+                </select>
+            </div>
+            <div id="selectedDate" style="font-size: 1.2em; color: #444; margin: 10px 0;"></div>
+            <div class="trainer-activities" id="activities"><p class="loading">Loading activities...</p></div>
         </div>
     </div>
 
@@ -727,7 +767,7 @@
             <form id="add-upcoming-session-form">
                 <input type="text" id="upcoming-name" placeholder="Presenter Name" required>
                 <input type="text" id="upcoming-month" placeholder="Month (e.g., April)" required>
-                <input type="text" id="upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
+                <input type="text" id="upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
                 <input type="text" id="upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="upcoming-topic" placeholder="Topic" required>
                 <textarea id="upcoming-description" placeholder="Description" required></textarea>
@@ -763,7 +803,7 @@
                 </select>
                 <input type="text" id="update-upcoming-name" placeholder="Presenter Name" required>
                 <input type="text" id="update-upcoming-month" placeholder="Month (e.g., April)" required>
-                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
+                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
                 <input type="text" id="update-upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="update-upcoming-topic" placeholder="Topic" required>
                 <textarea id="update-upcoming-description" placeholder="Description" required></textarea>
@@ -833,7 +873,7 @@
             ];
 
             const upcomingSessions = [
-                { name: "Vishal Nandan Tiwari", month: "April", date: "April 28, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills...", image: null },
+                { name: "Vishal Nandan Tiwari", month: "April", date: "April 11, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills...", image: null },
                 { name: "Shaikh Nayeem", month: "May", date: "May 9, 2025", time: "TBD", topic: "Audit Pointers", description: "will share valuable insights on audit pointers...", image: null },
                 { name: "Nitesh Kushwaha", month: "June", date: "June 13, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
                 { name: "Satguru Singh", month: "July", date: "July 11, 2025", time: "TBD", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged...", image: null }
@@ -842,6 +882,53 @@
             const sessionDetails = {};
             const presenterImages = {};
             const adminPassword = "Mahendra5*";
+
+            const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3sjgKIrzKjO2U3a3tQL-e-uzwAZY-RdX2_NO_nwzb9pGqITvfLz-0udDcPm4S6cKR3ZDYkpqooqR/pub?output=csv';
+            let csvData = [];
+
+            const trainers = [
+                "Pushpendra - Jabalpur MP-CG",
+                "Amit Sharma - Bhopal-Jhansi",
+                "Vaibhav Pathak - GJ",
+                "Bichhanda Sahoo - Orrisa East",
+                "Pramod Tandi - Orrisa West",
+                "Deepak Pandey - Bhagalpur, Bihar",
+                "Raman Kumar Jha - Giridih, Jharkhand",
+                "Rakesh Samanto - Ranchi",
+                "Briti Sundar Bagui - WB",
+                "Keshav Sada - Darbhanga & Muzaffarpur, Bihar",
+                "Anand Rai - VNS / GGK",
+                "Parthiban - Trichy, TN",
+                "Roobanraj - Madurai, TN",
+                "Kirubhakaran - Chennai, TN",
+                "Pawan Kulkarni - Mandya, KK",
+                "Ganesh Prasad - Patna & Motihari, Bihar",
+                "Vishal Tiwari - LKO-BE (UP-UK)",
+                "Jatinder Singh - PB-HR",
+                "Shaik Nayeem - AP & Telangana",
+                "Amit Pandey - Rajasthan",
+                "Krishna Kumar - Saharanpur -Meerut (UP-UK)",
+                "Kamlesh Wath - Maharashtra",
+                "Bhaskar Deka - Assam",
+                "Satguru Singh - Indore",
+                "Amandeep Singh - UP (Agra-Noida)",
+                "Jogipeta Buchaiah - Telangana",
+                "Nitesh Singh - Haryana"
+            ];
+
+            // Load CSV data on page load
+            Papa.parse(sheetURL, {
+                download: true,
+                complete: function(results) {
+                    csvData = results.data;
+                    console.log("✅ Data Loaded", csvData);
+                    updateTrainers();
+                },
+                error: function(err) {
+                    console.error("❌ Error loading CSV:", err);
+                    document.getElementById('activities').innerHTML = '<p>Error loading activities. Please try again later.</p>';
+                }
+            });
 
             pastSessions.forEach(session => {
                 const key = session.name.toLowerCase().replace(/\s+/g, '-');
@@ -969,11 +1056,92 @@
             };
 
             const calendarModal = document.getElementById("calendar-modal");
-            window.openCalendar = () => calendarModal.classList.add("show");
+            window.openCalendar = () => {
+                calendarModal.classList.add("show");
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('datePicker').value = today;
+                showActivities();
+            };
             window.closeCalendar = () => calendarModal.classList.remove("show");
             calendarModal.addEventListener("click", e => {
                 if (e.target === calendarModal) closeCalendar();
             });
+
+            function formatDate(date) {
+                const d = new Date(date);
+                const day = d.getDate();
+                const month = d.toLocaleString('default', { month: 'short' });
+                const year = String(d.getFullYear()).slice(-2);
+                return `${day}-${month}-${year}`;
+            }
+
+            function updateTrainers() {
+                const trainerSelect = document.getElementById('trainerSelect');
+                trainerSelect.innerHTML = '<option value="">Select a Trainer</option>';
+                trainers.forEach(trainer => {
+                    const option = document.createElement('option');
+                    option.value = trainer;
+                    option.textContent = trainer;
+                    trainerSelect.appendChild(option);
+                });
+            }
+
+            window.showActivities = () => {
+                const selectedDate = document.getElementById('datePicker').value;
+                const selectedTrainer = document.getElementById('trainerSelect').value;
+                const formattedDate = formatDate(selectedDate);
+                
+                document.getElementById('selectedDate').textContent = selectedTrainer 
+                    ? `Activities for: ${formattedDate} - ${selectedTrainer}` 
+                    : `Activities for: ${formattedDate}`;
+                
+                const headers = csvData[0];
+                const rows = csvData.slice(1);
+                const dateRow = rows.find(row => row[0].trim() === formattedDate);
+
+                const output = document.getElementById('activities');
+                output.innerHTML = '<p class="loading">Loading activities...</p>';
+
+                if (!dateRow) {
+                    output.innerHTML = `<p>No data found for ${formattedDate}.</p>`;
+                    return;
+                }
+
+                output.innerHTML = ''; // Clear loading message
+                if (selectedTrainer) {
+                    // Show only selected trainer's activity
+                    const trainerIndex = trainers.indexOf(selectedTrainer) + 2; // +2 to account for date and empty columns
+                    const activity = dateRow[trainerIndex]?.trim();
+                    
+                    if (activity) {
+                        const trainerDiv = document.createElement('div');
+                        trainerDiv.className = 'trainer-activity';
+                        trainerDiv.innerHTML = `
+                            <h4>${selectedTrainer}</h4>
+                            <p>${activity}</p>
+                            <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${selectedTrainer}\nDate: ${formattedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
+                        `;
+                        output.appendChild(trainerDiv);
+                    } else {
+                        output.innerHTML = `<p>No activity found for ${selectedTrainer} on ${formattedDate}.</p>`;
+                    }
+                } else {
+                    // Show all trainers' activities
+                    trainers.forEach((trainer, index) => {
+                        const activity = dateRow[index + 2]?.trim(); // +2 to skip date and empty columns
+                        if (activity) {
+                            const trainerDiv = document.createElement('div');
+                            trainerDiv.className = 'trainer-activity';
+                            trainerDiv.innerHTML = `
+                                <h4>${trainer}</h4>
+                                <p>${activity}</p>
+                                <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${trainer}\nDate: ${formattedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
+                            `;
+                            output.appendChild(trainerDiv);
+                        }
+                    });
+                }
+            };
 
             const upcomingModal = document.getElementById("upcoming-modal");
             window.openUpcoming = () => upcomingModal.classList.add("show");
