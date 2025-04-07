@@ -613,7 +613,6 @@
             width: 100%;
         }
 
-        /* Visitor Log Modal Styles */
         #visitor-log-modal .modal-content {
             max-width: 1000px;
             text-align: center;
@@ -775,7 +774,7 @@
             <form id="add-upcoming-session-form">
                 <input type="text" id="upcoming-name" placeholder="Presenter Name" required>
                 <input type="text" id="upcoming-month" placeholder="Month (e.g., April)" required>
-                <input type="text" id="upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
+                <input type="text" id="upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
                 <input type="text" id="upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="upcoming-topic" placeholder="Topic" required>
                 <textarea id="upcoming-description" placeholder="Description" required></textarea>
@@ -811,7 +810,7 @@
                 </select>
                 <input type="text" id="update-upcoming-name" placeholder="Presenter Name" required>
                 <input type="text" id="update-upcoming-month" placeholder="Month (e.g., April)" required>
-                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
+                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
                 <input type="text" id="update-upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="update-upcoming-topic" placeholder="Topic" required>
                 <textarea id="update-upcoming-description" placeholder="Description" required></textarea>
@@ -916,7 +915,7 @@
             const upcomingSessions = [
                 { name: "Vishal Nandan Tiwari", month: "April", date: "April 28, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills...", image: null },
                 { name: "Shaikh Nayeem", month: "May", date: "May 26, 2025", time: "TBD", topic: "Audit Pointers", description: "will share valuable insights on audit pointers...", image: null },
-                { name: "Nitesh Kushwaha", month: "June", date: "June 30, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
+                { name: "Nitesh Kushwaha", month: "June", date: "June 23, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
                 { name: "Satguru Singh", month: "July", date: "July 28, 2025", time: "TBD", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged...", image: null }
             ];
 
@@ -957,6 +956,20 @@
                 "Jogipeta Buchaiah - Telangana",
                 "Nitesh Singh - Haryana"
             ];
+
+            // Log visitor data on page load
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString(),
+                    ip: "Unknown (Client-side limitation)",
+                    browser: navigator.userAgent,
+                    device: /Mobi/.test(navigator.userAgent) ? "Mobile" : "Desktop"
+                }),
+                mode: "no-cors"
+            }).catch(err => console.error("Error logging visitor:", err));
 
             // Load CSV data on page load
             Papa.parse(sheetURL, {
@@ -1302,6 +1315,8 @@
 
             window.openVisitorLog = () => {
                 closeAdmin();
+                document.getElementById('filter-date').value = '';
+                document.getElementById('filter-browser').value = '';
                 visitorLogModal.classList.add("show");
                 fetchVisitorData();
             };
@@ -1686,6 +1701,7 @@
                 fetch(GOOGLE_SCRIPT_URL)
                     .then(res => res.json())
                     .then(data => {
+                        console.log("Fetched visitor data:", data); // Debug log
                         renderVisitorTable(data);
                         populateBrowserFilter(data);
                     })
@@ -1700,6 +1716,11 @@
                 const browserFilter = document.getElementById('filter-browser').value;
                 const table = document.getElementById('visitor-data');
                 table.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    table.innerHTML = '<tr><td colspan="5">No visitor data available.</td></tr>';
+                    return;
+                }
 
                 data.forEach(entry => {
                     if ((dateFilter && entry.date !== dateFilter) || (browserFilter && entry.browser !== browserFilter)) return;
