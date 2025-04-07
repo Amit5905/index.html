@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --primary-color: #3a7bd5;
@@ -611,6 +612,12 @@
         form button {
             width: 100%;
         }
+
+        /* Visitor Log Modal Styles */
+        #visitor-log-modal .modal-content {
+            max-width: 1000px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -742,6 +749,7 @@
             <button onclick="openUploadImage()" class="button cool-color">Upload Presenter Image</button>
             <button onclick="generateReport()" class="button accent">Generate Report</button>
             <button onclick="openSessionFeedback()" class="button success">View Session Feedback</button>
+            <button onclick="openVisitorLog()" class="button primary">Visitor Log</button>
             <button onclick="triggerCoolEffect()" class="button success">Cool Effect</button>
         </div>
     </div>
@@ -803,7 +811,7 @@
                 </select>
                 <input type="text" id="update-upcoming-name" placeholder="Presenter Name" required>
                 <input type="text" id="update-upcoming-month" placeholder="Month (e.g., April)" required>
-                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
+                <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
                 <input type="text" id="update-upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
                 <input type="text" id="update-upcoming-topic" placeholder="Topic" required>
                 <textarea id="update-upcoming-description" placeholder="Description" required></textarea>
@@ -855,6 +863,39 @@
         </div>
     </div>
 
+    <div id="visitor-log-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVisitorLog()"><i class="fas fa-times"></i></span>
+            <h3>SPOT Session Visitor Log</h3>
+            <div class="mb-4 flex gap-4 flex-wrap justify-between">
+                <div>
+                    <label class="block font-medium">Filter by Date</label>
+                    <input type="date" id="filter-date" class="border p-2 rounded w-full" />
+                </div>
+                <div>
+                    <label class="block font-medium">Filter by Browser</label>
+                    <select id="filter-browser" class="border p-2 rounded w-full">
+                        <option value="">All Browsers</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-auto rounded-lg shadow bg-white">
+                <table class="min-w-full text-sm text-left">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="p-3">Date</th>
+                            <th class="p-3">Time</th>
+                            <th class="p-3">IP</th>
+                            <th class="p-3">Browser</th>
+                            <th class="p-3">Device</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitor-data" class="divide-y divide-gray-200"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <footer>
         © 2025 Fusion Finance LTD. All rights reserved.
     </footer>
@@ -875,13 +916,14 @@
             const upcomingSessions = [
                 { name: "Vishal Nandan Tiwari", month: "April", date: "April 28, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills...", image: null },
                 { name: "Shaikh Nayeem", month: "May", date: "May 26, 2025", time: "TBD", topic: "Audit Pointers", description: "will share valuable insights on audit pointers...", image: null },
-                { name: "Nitesh Kushwaha", month: "June", date: "June 23, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
-                { name: "Satguru Singh", month: "July", date: "July 28, 2025", time: "03:00", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged...", image: null }
+                { name: "Nitesh Kushwaha", month: "June", date: "June 30, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
+                { name: "Satguru Singh", month: "July", date: "July 28, 2025", time: "TBD", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged...", image: null }
             ];
 
             const sessionDetails = {};
             const presenterImages = {};
             const adminPassword = "Mahendra5*";
+            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiL7WukVam6Y5fM5URvtZsvyiWnKsLLw3ELcRZJ-dv0O97FFop_37gbqxMhhFBX02miA/exec";
 
             const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3sjgKIrzKjO2U3a3tQL-e-uzwAZY-RdX2_NO_nwzb9pGqITvfLz-0udDcPm4S6cKR3ZDYkpqooqR/pub?output=csv';
             let csvData = [];
@@ -1109,7 +1151,6 @@
 
                 output.innerHTML = ''; // Clear loading message
                 if (selectedTrainer) {
-                    // Show only selected trainer's activity
                     const trainerIndex = trainers.indexOf(selectedTrainer) + 2; // +2 to account for date and empty columns
                     const activity = dateRow[trainerIndex]?.trim();
                     
@@ -1126,7 +1167,6 @@
                         output.innerHTML = `<p>No activity found for ${selectedTrainer} on ${formattedDate}.</p>`;
                     }
                 } else {
-                    // Show all trainers' activities
                     trainers.forEach((trainer, index) => {
                         const activity = dateRow[index + 2]?.trim(); // +2 to skip date and empty columns
                         if (activity) {
@@ -1181,6 +1221,7 @@
             const uploadImageModal = document.getElementById("upload-image-modal");
             const reportModal = document.getElementById("report-modal");
             const sessionFeedbackModal = document.getElementById("session-feedback-modal");
+            const visitorLogModal = document.getElementById("visitor-log-modal");
 
             window.openAdminPrompt = () => {
                 const enteredPassword = prompt("Enter admin password:");
@@ -1259,6 +1300,13 @@
             };
             window.closeSessionFeedback = () => sessionFeedbackModal.classList.remove("show");
 
+            window.openVisitorLog = () => {
+                closeAdmin();
+                visitorLogModal.classList.add("show");
+                fetchVisitorData();
+            };
+            window.closeVisitorLog = () => visitorLogModal.classList.remove("show");
+
             adminModal.addEventListener("click", e => {
                 if (e.target === adminModal) closeAdmin();
             });
@@ -1285,6 +1333,9 @@
             });
             sessionFeedbackModal.addEventListener("click", e => {
                 if (e.target === sessionFeedbackModal) closeSessionFeedback();
+            });
+            visitorLogModal.addEventListener("click", e => {
+                if (e.target === visitorLogModal) closeVisitorLog();
             });
 
             document.getElementById("add-past-session-form").addEventListener("submit", e => {
@@ -1630,6 +1681,55 @@
                     });
                 }
             }
+
+            function fetchVisitorData() {
+                fetch(GOOGLE_SCRIPT_URL)
+                    .then(res => res.json())
+                    .then(data => {
+                        renderVisitorTable(data);
+                        populateBrowserFilter(data);
+                    })
+                    .catch(err => {
+                        console.error("Error fetching visitor data:", err);
+                        document.getElementById('visitor-data').innerHTML = '<tr><td colspan="5">Error loading visitor data.</td></tr>';
+                    });
+            }
+
+            function renderVisitorTable(data) {
+                const dateFilter = document.getElementById('filter-date').value;
+                const browserFilter = document.getElementById('filter-browser').value;
+                const table = document.getElementById('visitor-data');
+                table.innerHTML = "";
+
+                data.forEach(entry => {
+                    if ((dateFilter && entry.date !== dateFilter) || (browserFilter && entry.browser !== browserFilter)) return;
+
+                    const row = `<tr>
+                        <td class="p-3">${entry.date}</td>
+                        <td class="p-3">${entry.time}</td>
+                        <td class="p-3">${entry.ip}</td>
+                        <td class="p-3">${entry.browser}</td>
+                        <td class="p-3">${entry.device}</td>
+                    </tr>`;
+                    table.innerHTML += row;
+                });
+            }
+
+            function populateBrowserFilter(data) {
+                const select = document.getElementById("filter-browser");
+                select.innerHTML = '<option value="">All Browsers</option>';
+                const browsers = [...new Set(data.map(d => d.browser))];
+                browsers.forEach(browser => {
+                    const option = document.createElement("option");
+                    option.value = browser;
+                    option.textContent = browser;
+                    select.appendChild(option);
+                });
+            }
+
+            document.getElementById("filter-date").addEventListener("change", fetchVisitorData);
+            document.getElementById("filter-browser").addEventListener("change", fetchVisitorData);
+
             displaySessionFeedback();
         });
     </script>
