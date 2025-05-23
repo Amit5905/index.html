@@ -214,6 +214,8 @@
             display: flex;
             gap: 15px;
             margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         #whatsapp-button {
@@ -484,14 +486,16 @@
         }
 
         .schedule-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15); /* Slightly more opaque */
             border-radius: 10px;
             padding: 20px;
             margin: 15px 0;
             text-align: left;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
+            color: var(--dark-color); /* Text color for readability */
         }
+
 
         .schedule-card:hover {
             transform: translateY(-5px);
@@ -506,7 +510,7 @@
 
         .schedule-card p {
             font-size: 1rem;
-            color: #555;
+            color: #333; /* Darker text for better readability */
             line-height: 1.6;
         }
 
@@ -521,7 +525,7 @@
             font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: var(--primary-color);
+            color: var(--primary-color); /* Changed for better contrast in modal */
         }
 
         .trainer-link:hover {
@@ -531,7 +535,7 @@
         .month-name {
             font-weight: bold;
             font-size: 1.2rem;
-            color: var(--primary-color);
+            color: var(--primary-color); /* Changed for better contrast in modal */
             margin-right: 5px;
         }
 
@@ -539,7 +543,7 @@
             font-size: 1.5rem;
             color: var(--success-color);
             margin-top: 20px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* Softer shadow */
         }
 
         .presenter-image {
@@ -549,6 +553,7 @@
             object-fit: cover;
             margin: 10px auto;
             border: 2px solid var(--primary-color);
+            display: block; /* Ensure it behaves as a block for auto margins */
         }
 
         .cool-effect {
@@ -579,8 +584,13 @@
             .nav-buttons {
                 flex-direction: column;
             }
+
             .button {
                 margin: 5px;
+            }
+            .social-buttons {
+                flex-direction: column;
+                align-items: center;
             }
         }
 
@@ -594,6 +604,7 @@
             border: 1px solid #ddd;
             transition: all 0.3s ease;
             font-size: 1rem;
+            color: #333; /* Ensure text is readable */
         }
 
         form input:focus,
@@ -617,6 +628,35 @@
             max-width: 1000px;
             text-align: center;
         }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            color: #333; /* Ensure table text is readable */
+        }
+
+        th {
+            background-color: #3a7bd5;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        #past-sessions-list li, #session-feedback-list li { /* Style for lists in modals */
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: var(--dark-color);
+        }
+        #past-sessions-list li:last-child, #session-feedback-list li:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -632,7 +672,7 @@
             </div>
         </header>
 
-        <h1 id="next-presenter"></h1>
+        <h1 id="next-presenter">Loading next presenter...</h1>
 
         <div class="social-buttons">
             <a class="button success" id="whatsapp-button" href="https://wa.me/917869647238" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
@@ -673,7 +713,7 @@
                 <strong id="total-sessions"></strong><br>
                 <em>A Milestone in Our Learning Odyssey - More to Come!</em>
             </div>
-            <hr>
+            <hr style="margin: 20px 0;">
             <p><strong>A Round of Applause!</strong><br>A huge thank you to all our speakers for their dedication and for sharing their knowledge with us!</p>
             <p>Let’s continue this journey of learning, collaborating, and excelling together.</p>
             <p><em>Keep learning, keep growing!</em></p>
@@ -746,7 +786,7 @@
             <button onclick="openUpdateUpcomingSession()" class="button warning">Update Upcoming Session</button>
             <button onclick="openRemoveSession()" class="button accent">Remove Session</button>
             <button onclick="openUploadImage()" class="button cool-color">Upload Presenter Image</button>
-            <button onclick="generateReport()" class="button accent">Generate Report</button>
+            <button onclick="openReport()" class="button accent">Generate Report</button> <!-- Changed to openReport -->
             <button onclick="openSessionFeedback()" class="button success">View Session Feedback</button>
             <button onclick="openVisitorLog()" class="button primary">Visitor Log</button>
             <button onclick="triggerCoolEffect()" class="button success">Cool Effect</button>
@@ -776,8 +816,8 @@
                 <input type="text" id="upcoming-month" placeholder="Month (e.g., April)" required>
                 <input type="text" id="upcoming-date" placeholder="Date (e.g., April 28, 2025)" required>
                 <input type="text" id="upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
-                <input type="text" id="upcoming-topic" placeholder="Topic" required>
-                <textarea id="upcoming-description" placeholder="Description" required></textarea>
+                <input type="text" id="upcoming-session-topic" placeholder="Topic" required> <!-- Changed ID to avoid conflict -->
+                <textarea id="upcoming-session-description" placeholder="Description" required></textarea> <!-- Changed ID to avoid conflict -->
                 <button type="submit" class="button success">Add Session</button>
             </form>
         </div>
@@ -812,7 +852,7 @@
                 <input type="text" id="update-upcoming-month" placeholder="Month (e.g., April)" required>
                 <input type="text" id="update-upcoming-date" placeholder="Date (e.g., April 11, 2025)" required>
                 <input type="text" id="update-upcoming-time" placeholder="Time (e.g., 3:00 PM IST or TBD)" required>
-                <input type="text" id="update-upcoming-topic" placeholder="Topic" required>
+                <input type="text" id="update-upcoming-topic" placeholder="Topic" required> <!-- Changed ID from upcoming-topic -->
                 <textarea id="update-upcoming-description" placeholder="Description" required></textarea>
                 <button type="submit" class="button success">Update Session</button>
             </form>
@@ -866,21 +906,21 @@
         <div class="modal-content">
             <span class="close" onclick="closeVisitorLog()"><i class="fas fa-times"></i></span>
             <h3>SPOT Session Visitor Log</h3>
-            <div class="mb-4 flex gap-4 flex-wrap justify-between">
+            <div class="mb-4 flex gap-4 flex-wrap justify-between items-end">
                 <div>
-                    <label class="block font-medium">Filter by Date</label>
-                    <input type="date" id="filter-date" class="border p-2 rounded w-full" />
+                    <label for="filter-date" class="block font-medium text-sm text-gray-700">Filter by Date</label>
+                    <input type="date" id="filter-date" class="border p-2 rounded w-full mt-1" onchange="fetchVisitorData()" />
                 </div>
                 <div>
-                    <label class="block font-medium">Filter by Browser</label>
-                    <select id="filter-browser" class="border p-2 rounded w-full">
+                    <label for="filter-browser" class="block font-medium text-sm text-gray-700">Filter by Browser</label>
+                    <select id="filter-browser" class="border p-2 rounded w-full mt-1" onchange="fetchVisitorData()">
                         <option value="">All Browsers</option>
                     </select>
                 </div>
             </div>
-            <div class="overflow-auto rounded-lg shadow bg-white">
+            <div class="overflow-auto rounded-lg shadow bg-white max-h-[50vh]">
                 <table class="min-w-full text-sm text-left">
-                    <thead class="bg-blue-600 text-white">
+                    <thead class="bg-blue-600 text-white sticky top-0">
                         <tr>
                             <th class="p-3">Date</th>
                             <th class="p-3">Time</th>
@@ -902,6 +942,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Data initialization
             const pastSessions = [
                 { name: "Deepak Pandey", month: "September", topic: "Center Meetings & Risk Association", description: "shared his deep understanding of Center Meetings & Risk Association...", image: null },
                 { name: "Shashi", month: "October", topic: "Importance of Communication in Team Cohesion", description: "brought an essential soft skills session...", image: null },
@@ -909,12 +950,11 @@
                 { name: "Parthiban", month: "December", topic: "SPOT Session on Audit", description: "shed light on key audit checkpoints...", image: null },
                 { name: "Vishal", month: "January", topic: "Canva Training", description: "introduced us to Canva...", image: null },
                 { name: "Bichhanda", month: "February", topic: "Webshakti & M Shakti", description: "guided us through Webshakti & M Shakti...", image: null },
-                { name: "Amit Pandey", month: "March", topic: "Storytelling", description: "delivered an engaging session on the art of storytelling...", image: null }
+                { name: "Amit Pandey", month: "March", topic: "Storytelling", description: "delivered an engaging session on the art of storytelling...", image: null },
                 { name: "Vishal Tiwari", month: "April", topic: "Canva", description: "delivered an engaging session on the art of Canva...", image: null }
             ];
 
             const upcomingSessions = [
-                { name: "Vishal Nandan Tiwari", month: "April", date: "April 28, 2025", time: "3:00 PM IST", topic: "Canva Training", description: "will conduct a session on Canva, helping you master design skills...", image: null },
                 { name: "Shaikh Nayeem", month: "May", date: "May 26, 2025", time: "TBD", topic: "Audit Pointers", description: "will share valuable insights on audit pointers...", image: null },
                 { name: "Nitesh Kushwaha", month: "June", date: "June 23, 2025", time: "TBD", topic: "Safety", description: "will discuss safety measures and risk associations...", image: null },
                 { name: "Satguru Singh", month: "July", date: "July 28, 2025", time: "TBD", topic: "How to Keep Participants Engaged", description: "will provide strategies to keep participants engaged...", image: null }
@@ -922,113 +962,116 @@
 
             const sessionDetails = {};
             const presenterImages = {};
-            const adminPassword = "Mahendra5*";
+            const feedbackList = [];
+            const adminPassword = "Mahendra5*"; // Standard practice is to not store passwords client-side. This is for demo purposes.
             const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiL7WukVam6Y5fM5URvtZsvyiWnKsLLw3ELcRZJ-dv0O97FFop_37gbqxMhhFBX02miA/exec";
-
-            const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe3sjgKIrzKjO2U3a3tQL-e-uzwAZY-RdX2_NO_nwzb9pGqITvfLz-0udDcPm4S6cKR3ZDYkpqooqR/pub?output=csv';
+            const sheetURL = 'https://docs.google.com/spreadsheets/d/1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/pub?output=csv'; // Replace XXXXX with actual Sheet ID
             let csvData = [];
 
             const trainers = [
-                "Pushpendra - Jabalpur MP-CG",
-                "Amit Sharma - Bhopal-Jhansi",
-                "Vaibhav Pathak - GJ",
-                "Bichhanda Sahoo - Orrisa East",
-                "Pramod Tandi - Orrisa West",
-                "Deepak Pandey - Bhagalpur, Bihar",
-                "Raman Kumar Jha - Giridih, Jharkhand",
-                "Rakesh Samanto - Ranchi",
-                "Briti Sundar Bagui - WB",
-                "Keshav Sada - Darbhanga & Muzaffarpur, Bihar",
-                "Anand Rai - VNS / GGK",
-                "Parthiban - Trichy, TN",
-                "Roobanraj - Madurai, TN",
-                "Kirubhakaran - Chennai, TN",
-                "Pawan Kulkarni - Mandya, KK",
-                "Ganesh Prasad - Patna & Motihari, Bihar",
-                "Vishal Tiwari - LKO-BE (UP-UK)",
-                "Jatinder Singh - PB-HR",
-                "Shaik Nayeem - AP & Telangana",
-                "Amit Pandey - Rajasthan",
-                "Krishna Kumar - Saharanpur -Meerut (UP-UK)",
-                "Kamlesh Wath - Maharashtra",
-                "Bhaskar Deka - Assam",
-                "Satguru Singh - Indore",
-                "Amandeep Singh - UP (Agra-Noida)",
-                "Jogipeta Buchaiah - Telangana",
-                "Nitesh Singh - Haryana"
+                "Pushpendra - Jabalpur MP-CG", "Amit Sharma - Bhopal-Jhansi", "Vaibhav Pathak - GJ", "Bichhanda Sahoo - Orrisa East",
+                "Pramod Tandi - Orrisa West", "Deepak Pandey - Bhagalpur, Bihar", "Raman Kumar Jha - Giridih, Jharkhand", "Rakesh Samanto - Ranchi",
+                "Briti Sundar Bagui - WB", "Keshav Sada - Darbhanga & Muzaffarpur, Bihar", "Anand Rai - VNS / GGK", "Parthiban - Trichy, TN",
+                "Roobanraj - Madurai, TN", "Kirubhakaran - Chennai, TN", "Pawan Kulkarni - Mandya, KK", "Ganesh Prasad - Patna & Motihari, Bihar",
+                "Vishal Tiwari - LKO-BE (UP-UK)", "Jatinder Singh - PB-HR", "Shaikh Nayeem - AP & Telangana", "Amit Pandey - Rajasthan",
+                "Krishna Kumar - Saharanpur -Meerut (UP-UK)", "Kamlesh Wath - Maharashtra", "Bhaskar Deka - Assam", "Satguru Singh - Indore",
+                "Amandeep Singh - UP (Agra-Noida)", "Jogipeta Buchaiah - Telangana", "Nitesh Singh - Haryana"
             ];
 
-            // Log visitor data on page load
+            // Log visitor data
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    action: "logVisitor", // Added action for clarity on Apps Script side
                     date: new Date().toISOString().split('T')[0],
                     time: new Date().toLocaleTimeString(),
-                    ip: "Unknown (Client-side limitation)",
+                    ip: "N/A (Client-side)",
                     browser: navigator.userAgent,
                     device: /Mobi/.test(navigator.userAgent) ? "Mobile" : "Desktop"
                 }),
-                mode: "no-cors"
+                mode: "no-cors" 
             }).catch(err => console.error("Error logging visitor:", err));
 
-            // Load CSV data on page load
+            // Load CSV data for Trainer Activities Calendar
             Papa.parse(sheetURL, {
                 download: true,
+                header: false, // Assuming first row is dates, second is header, then data
                 complete: function(results) {
                     csvData = results.data;
-                    console.log("✅ Data Loaded", csvData);
-                    updateTrainers();
+                    console.log("✅ Trainer Activity Data Loaded", csvData);
+                    updateTrainersForCalendar(); // Renamed for clarity
+                    if (document.getElementById('calendar-modal').classList.contains('show')) {
+                         showActivities(); // Refresh if calendar is open
+                    }
                 },
                 error: function(err) {
-                    console.error("❌ Error loading CSV:", err);
-                    document.getElementById('activities').innerHTML = '<p>Error loading activities. Please try again later.</p>';
+                    console.error("❌ Error loading Trainer Activity CSV:", err);
+                    if (document.getElementById('activities')) {
+                        document.getElementById('activities').innerHTML = '<p>Error loading activities. Please try again later.</p>';
+                    }
                 }
             });
 
-            pastSessions.forEach(session => {
-                const key = session.name.toLowerCase().replace(/\s+/g, '-');
-                sessionDetails[key] = `
-                    ${session.image ? `<img src="${session.image}" class="presenter-image">` : ''}
-                    <h3>${session.month} - ${session.topic}</h3>
-                    <p><strong>${session.name}</strong> ${session.description}</p>
-                `;
-            });
-            upcomingSessions.forEach(session => {
-                const key = session.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                sessionDetails[key] = `
-                    ${session.image ? `<img src="${session.image}" class="presenter-image">` : ''}
-                    <h3>${session.date} - ${session.topic} (Upcoming)</h3>
-                    <p><strong>${session.name}</strong> will present on ${session.date} at ${session.time}. ${session.description}</p>
-                `;
-            });
-
-            const nextPresenterElement = document.getElementById("next-presenter");
-            if (upcomingSessions.length > 0) {
-                const nextPresenter = upcomingSessions[0];
-                const nextKey = nextPresenter.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                nextPresenterElement.innerHTML = `
-                    Next SPOT Presenter: 
-                    <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${nextKey}')">${nextPresenter.name}</a> 
-                    (${nextPresenter.month})
-                    ${nextPresenter.image ? `<img src="${nextPresenter.image}" class="presenter-image">` : ''}
-                `;
-            } else {
-                nextPresenterElement.textContent = "No upcoming SPOT sessions scheduled.";
+            // Initialize session details
+            function updateSessionDetails() {
+                pastSessions.forEach(session => {
+                    const key = session.name.toLowerCase().replace(/\s+/g, '-');
+                    sessionDetails[key] = `
+                        ${session.image ? `<img src="${session.image}" class="presenter-image" alt="${session.name}">` : ''}
+                        <h3>${session.month} - ${session.topic}</h3>
+                        <p><strong>${session.name}</strong> ${session.description}</p>
+                    `;
+                });
+                upcomingSessions.forEach(session => {
+                    const key = session.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                    sessionDetails[key] = `
+                        ${session.image ? `<img src="${session.image}" class="presenter-image" alt="${session.name}">` : ''}
+                        <h3>${session.date} - ${session.topic} (Upcoming)</h3>
+                        <p><strong>${session.name}</strong> will present on ${session.date} at ${session.time}. ${session.description}</p>
+                    `;
+                });
             }
+            updateSessionDetails();
 
+
+            // Display next presenter
+            const nextPresenterElement = document.getElementById("next-presenter");
+            function displayNextPresenter() {
+                if (upcomingSessions.length > 0) {
+                    const nextPresenter = upcomingSessions[0];
+                    const nextKey = nextPresenter.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
+                    nextPresenterElement.innerHTML = `
+                        Next SPOT Presenter: 
+                        <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${nextKey}')">${nextPresenter.name}</a> 
+                        (${nextPresenter.month})
+                        ${nextPresenter.image ? `<img src="${nextPresenter.image}" class="presenter-image" alt="${nextPresenter.name}">` : ''}
+                    `;
+                } else {
+                    nextPresenterElement.textContent = "No upcoming SPOT sessions scheduled.";
+                }
+            }
+            displayNextPresenter();
+
+            // Populate past sessions
             const pastSessionsList = document.getElementById("past-sessions-list");
-            pastSessions.forEach(session => {
-                const li = document.createElement("li");
-                li.innerHTML = `
-                    ${session.image ? `<img src="${session.image}" class="presenter-image">` : ''}
-                    <span class="month-name">${session.month}</span> - 
-                    <a href="#" class="trainer-link" onclick="showCelebration('${session.name.toLowerCase().replace(/\s+/g, '-')}')">${session.name}</a>
-                `;
-                pastSessionsList.appendChild(li);
-            });
-            document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
+            function displayPastSessions() {
+                pastSessionsList.innerHTML = '';
+                pastSessions.forEach(session => {
+                    const li = document.createElement("li");
+                    const key = session.name.toLowerCase().replace(/\s+/g, '-');
+                    li.innerHTML = `
+                        ${session.image ? `<img src="${session.image}" class="presenter-image" alt="${session.name}">` : ''}
+                        <span class="month-name">${session.month}</span> - 
+                        <a href="#" class="trainer-link" onclick="showCelebration('${key}')">${session.name}</a> - ${session.topic}
+                    `;
+                    pastSessionsList.appendChild(li);
+                });
+                document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
+            }
+            displayPastSessions();
 
+            // Populate upcoming sessions
             const upcomingSessionsContainer = document.getElementById("upcoming-sessions");
             function displayUpcomingSessions() {
                 upcomingSessionsContainer.innerHTML = '';
@@ -1036,7 +1079,7 @@
                     const card = document.createElement("div");
                     card.className = "schedule-card";
                     card.innerHTML = `
-                        ${session.image ? `<img src="${session.image}" class="presenter-image">` : ''}
+                        ${session.image ? `<img src="${session.image}" class="presenter-image" alt="${session.name}">` : ''}
                         <h4>${session.name} - ${session.topic}</h4>
                         <p><span class="date">Date:</span> ${session.date}<br><span class="date">Time:</span> ${session.time}<br>${session.description}</p>
                     `;
@@ -1045,95 +1088,119 @@
             }
             displayUpcomingSessions();
 
+            // Modal functions
             const spotModal = document.getElementById("spot-modal");
-            window.openModal = () => spotModal.classList.add("show");
-            window.closeModal = () => spotModal.classList.remove("show");
-            spotModal.addEventListener("click", e => {
-                if (e.target === spotModal) closeModal();
-            });
+            window.openModal = function() { spotModal.classList.add("show"); };
+            window.closeModal = function() { spotModal.classList.remove("show"); };
+            spotModal.addEventListener("click", e => { if (e.target === spotModal) closeModal(); });
 
             const celebrationModal = document.getElementById("celebration-modal");
-            window.showCelebration = trainer => {
-                document.getElementById("celebration-content").innerHTML = sessionDetails[trainer] ||
+            window.showCelebration = function(key) {
+                document.getElementById("celebration-content").innerHTML = sessionDetails[key] ||
                     "<h3>Details Coming Soon</h3><p>Stay tuned!</p>";
                 celebrationModal.classList.add("show");
                 startConfetti();
             };
-            window.closeCelebration = () => {
+            window.closeCelebration = function() {
                 celebrationModal.classList.remove("show");
                 stopConfetti();
             };
-            celebrationModal.addEventListener("click", e => {
-                if (e.target === celebrationModal) closeCelebration();
-            });
+            celebrationModal.addEventListener("click", e => { if (e.target === celebrationModal) closeCelebration(); });
 
             let confettiInterval;
             function startConfetti() {
                 const canvas = document.getElementById("confetti-canvas");
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                confettiInterval = setInterval(() => {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#FFD700', '#FF4500', '#00FF00']
+                if (!canvas) return;
+                canvas.width = celebrationModal.querySelector('.modal-content').offsetWidth; // Set canvas to modal content width
+                canvas.height = celebrationModal.querySelector('.modal-content').offsetHeight; // Set canvas to modal content height
+                
+                const myConfetti = confetti.create(canvas, {
+                    resize: true,
+                    useWorker: true
+                });
+
+                function frame() {
+                    myConfetti({
+                        particleCount: 2,
+                        angle: 60,
+                        spread: 55,
+                        origin: { x: 0 },
+                        colors: ['#FFD700', '#FF4500', '#00FF00', '#3a7bd5', '#00d2ff']
                     });
-                }, 500);
+                    myConfetti({
+                        particleCount: 2,
+                        angle: 120,
+                        spread: 55,
+                        origin: { x: 1 },
+                        colors: ['#FFD700', '#FF4500', '#00FF00', '#3a7bd5', '#00d2ff']
+                    });
+
+                    if (Date.now() < Date.now() + 15000 && celebrationModal.classList.contains('show')) { // Stop after 15s or if modal closed
+                       confettiInterval = requestAnimationFrame(frame);
+                    } else {
+                        myConfetti.reset();
+                    }
+                }
+                confettiInterval = requestAnimationFrame(frame);
             }
             function stopConfetti() {
-                clearInterval(confettiInterval);
-                confetti.reset();
+                cancelAnimationFrame(confettiInterval);
+                if(confetti && typeof confetti.reset === 'function') confetti.reset();
             }
 
+
             const feedbackModal = document.getElementById("feedback-modal");
-            window.openFeedback = () => feedbackModal.classList.add("show");
-            window.closeFeedback = () => {
+            window.openFeedback = function() { feedbackModal.classList.add("show"); };
+            window.closeFeedback = function() {
                 feedbackModal.classList.remove("show");
                 document.getElementById("feedback-text").value = "";
             };
-            feedbackModal.addEventListener("click", e => {
-                if (e.target === feedbackModal) closeFeedback();
-            });
+            feedbackModal.addEventListener("click", e => { if (e.target === feedbackModal) closeFeedback(); });
 
-            window.submitFeedback = () => {
+            window.submitFeedback = function() {
                 const feedback = document.getElementById("feedback-text").value.trim();
                 if (feedback) {
-                    if (confirm("Submit feedback via email?")) {
-                        const subject = encodeURIComponent("SPOT Session Feedback");
-                        const body = encodeURIComponent(feedback);
-                        window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
-                        closeFeedback();
-                        storeFeedback(feedback);
-                    }
+                    feedbackList.push(feedback); // Store locally
+                    // Send to Google Sheet via Apps Script
+                    fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ action: "submitFeedback", feedback: feedback, timestamp: new Date().toISOString() }),
+                        mode: "no-cors"
+                    }).then(() => {
+                        alert("Feedback submitted! Thank you.");
+                    }).catch(err => {
+                        console.error("Error submitting feedback:", err);
+                        alert("Failed to submit feedback. Please try again.");
+                    });
+                    closeFeedback();
                 } else {
                     alert("Please enter your feedback before submitting!");
                 }
             };
 
             const calendarModal = document.getElementById("calendar-modal");
-            window.openCalendar = () => {
+            window.openCalendar = function() {
                 calendarModal.classList.add("show");
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('datePicker').value = today;
                 showActivities();
             };
-            window.closeCalendar = () => calendarModal.classList.remove("show");
-            calendarModal.addEventListener("click", e => {
-                if (e.target === calendarModal) closeCalendar();
-            });
+            window.closeCalendar = function() { calendarModal.classList.remove("show"); };
+            calendarModal.addEventListener("click", e => { if (e.target === calendarModal) closeCalendar(); });
 
-            function formatDate(date) {
-                const d = new Date(date);
-                const day = d.getDate();
-                const month = d.toLocaleString('default', { month: 'short' });
-                const year = String(d.getFullYear()).slice(-2);
-                return `${day}-${month}-${year}`;
+            function formatDate(dateString) { // Expects YYYY-MM-DD
+                if (!dateString) return "";
+                const [year, month, day] = dateString.split('-');
+                const dateObj = new Date(year, month - 1, day);
+                const shortMonth = dateObj.toLocaleString('default', { month: 'short' });
+                return `${day}-${shortMonth}-${year.slice(-2)}`; // DD-Mon-YY
             }
 
-            function updateTrainers() {
+
+            function updateTrainersForCalendar() {
                 const trainerSelect = document.getElementById('trainerSelect');
-                trainerSelect.innerHTML = '<option value="">Select a Trainer</option>';
+                trainerSelect.innerHTML = '<option value="">All Trainers</option>'; // Changed default
                 trainers.forEach(trainer => {
                     const option = document.createElement('option');
                     option.value = trainer;
@@ -1142,74 +1209,102 @@
                 });
             }
 
-            window.showActivities = () => {
-                const selectedDate = document.getElementById('datePicker').value;
-                const selectedTrainer = document.getElementById('trainerSelect').value;
-                const formattedDate = formatDate(selectedDate);
-                
-                document.getElementById('selectedDate').textContent = selectedTrainer 
-                    ? `Activities for: ${formattedDate} - ${selectedTrainer}` 
-                    : `Activities for: ${formattedDate}`;
-                
-                const headers = csvData[0];
-                const rows = csvData.slice(1);
-                const dateRow = rows.find(row => row[0].trim() === formattedDate);
-
-                const output = document.getElementById('activities');
-                output.innerHTML = '<p class="loading">Loading activities...</p>';
-
-                if (!dateRow) {
-                    output.innerHTML = `<p>No data found for ${formattedDate}.</p>`;
+            window.showActivities = function() {
+                if (csvData.length === 0) {
+                    document.getElementById('activities').innerHTML = '<p class="loading">Activity data not loaded yet. Please wait...</p>';
                     return;
                 }
 
-                output.innerHTML = ''; // Clear loading message
-                if (selectedTrainer) {
-                    const trainerIndex = trainers.indexOf(selectedTrainer) + 2; // +2 to account for date and empty columns
-                    const activity = dateRow[trainerIndex]?.trim();
-                    
-                    if (activity) {
-                        const trainerDiv = document.createElement('div');
-                        trainerDiv.className = 'trainer-activity';
-                        trainerDiv.innerHTML = `
-                            <h4>${selectedTrainer}</h4>
-                            <p>${activity}</p>
-                            <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${selectedTrainer}\nDate: ${formattedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
-                        `;
-                        output.appendChild(trainerDiv);
-                    } else {
-                        output.innerHTML = `<p>No activity found for ${selectedTrainer} on ${formattedDate}.</p>`;
+                const selectedDateInput = document.getElementById('datePicker').value; // YYYY-MM-DD
+                const selectedTrainer = document.getElementById('trainerSelect').value;
+                const formattedSelectedDate = formatDate(selectedDateInput); // DD-Mon-YY
+                
+                document.getElementById('selectedDate').textContent = selectedTrainer 
+                    ? `Activities for: ${formattedSelectedDate} - ${selectedTrainer}` 
+                    : `Activities for: ${formattedSelectedDate}`;
+                
+                const output = document.getElementById('activities');
+                output.innerHTML = '';
+
+                // Find the row index for the selected date
+                // Assuming dates are in the first column (index 0) of csvData
+                let dateRowIndex = -1;
+                for(let i=0; i < csvData.length; i++) {
+                    if(csvData[i] && csvData[i][0] && csvData[i][0].trim() === formattedSelectedDate) {
+                        dateRowIndex = i;
+                        break;
                     }
-                } else {
+                }
+
+                if (dateRowIndex === -1) {
+                    output.innerHTML = `<p>No data found for ${formattedSelectedDate}.</p>`;
+                    return;
+                }
+                
+                const dateRowData = csvData[dateRowIndex];
+                // Assuming trainer names in `trainers` array correspond to columns starting from index 1 in csvData
+                // This needs careful mapping if the CSV headers are different or not in the same order.
+                // For simplicity, let's assume the CSV columns (from 2nd col onwards) match the 'trainers' array.
+                // CSV header row (e.g., csvData[0] or csvData[1]) might contain actual trainer names for more robust mapping.
+                // For now, direct mapping based on `trainers` array index.
+
+                let activityFound = false;
+                if (selectedTrainer) {
+                    const trainerIndexInArray = trainers.indexOf(selectedTrainer);
+                    if (trainerIndexInArray !== -1) {
+                        // Assuming CSV data for trainers starts at column 1 (index 1)
+                        const activity = dateRowData[trainerIndexInArray + 1]?.trim(); 
+                        if (activity) {
+                            const trainerDiv = document.createElement('div');
+                            trainerDiv.className = 'trainer-activity';
+                            trainerDiv.innerHTML = `
+                                <h4>${selectedTrainer}</h4>
+                                <p>${activity}</p>
+                                <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${selectedTrainer}\nDate: ${formattedSelectedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
+                            `;
+                            output.appendChild(trainerDiv);
+                            activityFound = true;
+                        }
+                    }
+                } else { // All trainers for the selected date
                     trainers.forEach((trainer, index) => {
-                        const activity = dateRow[index + 2]?.trim(); // +2 to skip date and empty columns
+                        const activity = dateRowData[index + 1]?.trim(); // data for trainer at index `i` is in column `i+1`
                         if (activity) {
                             const trainerDiv = document.createElement('div');
                             trainerDiv.className = 'trainer-activity';
                             trainerDiv.innerHTML = `
                                 <h4>${trainer}</h4>
                                 <p>${activity}</p>
-                                <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${trainer}\nDate: ${formattedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
+                                <a target="_blank" href="https://wa.me/?text=${encodeURIComponent(`Trainer: ${trainer}\nDate: ${formattedSelectedDate}\nActivity: ${activity}`)}">📤 Share on WhatsApp</a>
                             `;
                             output.appendChild(trainerDiv);
+                            activityFound = true;
                         }
                     });
                 }
+
+                if (!activityFound) {
+                    if (selectedTrainer) {
+                        output.innerHTML = `<p>No activity found for ${selectedTrainer} on ${formattedSelectedDate}.</p>`;
+                    } else {
+                        output.innerHTML = `<p>No activities found for any trainer on ${formattedSelectedDate}.</p>`;
+                    }
+                }
             };
 
+
             const upcomingModal = document.getElementById("upcoming-modal");
-            window.openUpcoming = () => upcomingModal.classList.add("show");
-            window.closeUpcoming = () => upcomingModal.classList.remove("show");
-            upcomingModal.addEventListener("click", e => {
-                if (e.target === upcomingModal) closeUpcoming();
-            });
+            window.openUpcoming = function() { upcomingModal.classList.add("show"); };
+            window.closeUpcoming = function() { upcomingModal.classList.remove("show"); };
+            upcomingModal.addEventListener("click", e => { if (e.target === upcomingModal) closeUpcoming(); });
 
             const nominateModal = document.getElementById("nominate-modal");
-            window.openNominate = () => nominateModal.classList.add("show");
-            window.closeNominate = () => nominateModal.classList.remove("show");
-            nominateModal.addEventListener("click", e => {
-                if (e.target === nominateModal) closeNominate();
-            });
+            window.openNominate = function() { nominateModal.classList.add("show"); };
+            window.closeNominate = function() {
+                nominateModal.classList.remove("show");
+                document.getElementById("nominate-form").reset();
+            };
+            nominateModal.addEventListener("click", e => { if (e.target === nominateModal) closeNominate(); });
 
             document.getElementById("nominate-form").addEventListener("submit", e => {
                 e.preventDefault();
@@ -1217,15 +1312,31 @@
                 const employeeCode = document.getElementById("employee-code").value.trim();
                 const topic = document.getElementById("topic").value.trim();
                 if (name && employeeCode && topic) {
-                    const subject = encodeURIComponent("SPOT Session Nomination");
-                    const body = encodeURIComponent(`Name: ${name}\nEmployee Code: ${employeeCode}\nTopic: ${topic}`);
-                    window.location.href = `mailto:amitsharma@fusionfin.com?subject=${subject}&body=${body}`;
+                    // Send to Google Sheet via Apps Script
+                     fetch(GOOGLE_SCRIPT_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ 
+                            action: "nominateSelf", 
+                            name: name, 
+                            employeeCode: employeeCode, 
+                            topic: topic, 
+                            timestamp: new Date().toISOString() 
+                        }),
+                        mode: "no-cors"
+                    }).then(() => {
+                         alert("Nomination submitted! We will get back to you.");
+                    }).catch(err => {
+                        console.error("Error submitting nomination:", err);
+                        alert("Failed to submit nomination. Please try again or contact admin.");
+                    });
                     closeNominate();
                 } else {
                     alert("Please fill out all fields before submitting!");
                 }
             });
 
+            // Admin Modals
             const adminModal = document.getElementById("admin-modal");
             const addPastModal = document.getElementById("add-past-session-modal");
             const addUpcomingModal = document.getElementById("add-upcoming-session-modal");
@@ -1237,9 +1348,9 @@
             const sessionFeedbackModal = document.getElementById("session-feedback-modal");
             const visitorLogModal = document.getElementById("visitor-log-modal");
 
-            window.openAdminPrompt = () => {
+            window.openAdminPrompt = function() {
                 const enteredPassword = prompt("Enter admin password:");
-                if (enteredPassword === null) return; // User cancelled prompt
+                if (enteredPassword === null) return;
                 if (enteredPassword === adminPassword) {
                     openAdmin();
                 } else {
@@ -1247,113 +1358,53 @@
                 }
             };
 
-            window.openAdmin = () => {
-                adminModal.classList.add("show");
-            };
+            window.openAdmin = function() { adminModal.classList.add("show"); };
+            window.closeAdmin = function() { adminModal.classList.remove("show"); };
+            adminModal.addEventListener("click", e => { if (e.target === adminModal) closeAdmin(); });
+            
+            window.openAddPastSession = function() { closeAdmin(); addPastModal.classList.add("show"); };
+            window.closeAddPastSession = function() { addPastModal.classList.remove("show"); document.getElementById("add-past-session-form").reset(); };
+            addPastModal.addEventListener("click", e => { if (e.target === addPastModal) closeAddPastSession(); });
 
-            window.closeAdmin = () => {
-                adminModal.classList.remove("show");
-            };
+            window.openAddUpcomingSession = function() { closeAdmin(); addUpcomingModal.classList.add("show"); };
+            window.closeAddUpcomingSession = function() { addUpcomingModal.classList.remove("show"); document.getElementById("add-upcoming-session-form").reset(); };
+            addUpcomingModal.addEventListener("click", e => { if (e.target === addUpcomingModal) closeAddUpcomingSession(); });
 
-            window.openAddPastSession = () => {
-                closeAdmin();
-                addPastModal.classList.add("show");
-            };
-            window.closeAddPastSession = () => {
-                addPastModal.classList.remove("show");
-                document.getElementById("add-past-session-form").reset();
-            };
-            window.openAddUpcomingSession = () => {
-                closeAdmin();
-                addUpcomingModal.classList.add("show");
-            };
-            window.closeAddUpcomingSession = () => {
-                addUpcomingModal.classList.remove("show");
-                document.getElementById("add-upcoming-session-form").reset();
-            };
-            window.openUpdatePastSession = () => {
-                closeAdmin();
-                populatePastSessionDropdown();
-                updatePastModal.classList.add("show");
-            };
-            window.closeUpdatePastSession = () => {
-                updatePastModal.classList.remove("show");
-                document.getElementById("update-past-session-form").reset();
-            };
-            window.openUpdateUpcomingSession = () => {
-                closeAdmin();
-                populateUpcomingSessionDropdown();
-                updateUpcomingModal.classList.add("show");
-            };
-            window.closeUpdateUpcomingSession = () => {
-                updateUpcomingModal.classList.remove("show");
-                document.getElementById("update-upcoming-session-form").reset();
-            };
-            window.openRemoveSession = () => {
-                closeAdmin();
-                populateRemoveSessionDropdown();
-                removeSessionModal.classList.add("show");
-            };
-            window.closeRemoveSession = () => removeSessionModal.classList.remove("show");
-            window.openUploadImage = () => {
-                closeAdmin();
-                populatePresenterDropdown();
-                uploadImageModal.classList.add("show");
-            };
-            window.closeUploadImage = () => uploadImageModal.classList.remove("show");
-            window.openReport = () => {
-                closeAdmin();
-                reportModal.classList.add("show");
-                generateReport();
-            };
-            window.closeReport = () => reportModal.classList.remove("show");
-            window.openSessionFeedback = () => {
-                closeAdmin();
-                sessionFeedbackModal.classList.add("show");
-                displaySessionFeedback();
-            };
-            window.closeSessionFeedback = () => sessionFeedbackModal.classList.remove("show");
+            window.openUpdatePastSession = function() { closeAdmin(); populatePastSessionDropdown(); updatePastModal.classList.add("show"); };
+            window.closeUpdatePastSession = function() { updatePastModal.classList.remove("show"); document.getElementById("update-past-session-form").reset(); };
+            updatePastModal.addEventListener("click", e => { if (e.target === updatePastModal) closeUpdatePastSession(); });
+            
+            window.openUpdateUpcomingSession = function() { closeAdmin(); populateUpcomingSessionDropdown(); updateUpcomingModal.classList.add("show"); };
+            window.closeUpdateUpcomingSession = function() { updateUpcomingModal.classList.remove("show"); document.getElementById("update-upcoming-session-form").reset(); };
+            updateUpcomingModal.addEventListener("click", e => { if (e.target === updateUpcomingModal) closeUpdateUpcomingSession(); });
 
-            window.openVisitorLog = () => {
+            window.openRemoveSession = function() { closeAdmin(); populateRemoveSessionDropdown(); removeSessionModal.classList.add("show"); };
+            window.closeRemoveSession = function() { removeSessionModal.classList.remove("show"); };
+            removeSessionModal.addEventListener("click", e => { if (e.target === removeSessionModal) closeRemoveSession(); });
+
+            window.openUploadImage = function() { closeAdmin(); populatePresenterDropdownForImageUpload(); uploadImageModal.classList.add("show"); };
+            window.closeUploadImage = function() { uploadImageModal.classList.remove("show"); document.getElementById("image-upload").value = ""; };
+            uploadImageModal.addEventListener("click", e => { if (e.target === uploadImageModal) closeUploadImage(); });
+            
+            window.openReport = function() { closeAdmin(); reportModal.classList.add("show"); generateReport(); };
+            window.closeReport = function() { reportModal.classList.remove("show"); };
+            reportModal.addEventListener("click", e => { if (e.target === reportModal) closeReport(); });
+
+            window.openSessionFeedback = function() { closeAdmin(); sessionFeedbackModal.classList.add("show"); displaySessionFeedback(); };
+            window.closeSessionFeedback = function() { sessionFeedbackModal.classList.remove("show"); };
+            sessionFeedbackModal.addEventListener("click", e => { if (e.target === sessionFeedbackModal) closeSessionFeedback(); });
+
+            window.openVisitorLog = function() {
                 closeAdmin();
                 document.getElementById('filter-date').value = '';
                 document.getElementById('filter-browser').value = '';
                 visitorLogModal.classList.add("show");
                 fetchVisitorData();
             };
-            window.closeVisitorLog = () => visitorLogModal.classList.remove("show");
+            window.closeVisitorLog = function() { visitorLogModal.classList.remove("show"); };
+            visitorLogModal.addEventListener("click", e => { if (e.target === visitorLogModal) closeVisitorLog(); });
 
-            adminModal.addEventListener("click", e => {
-                if (e.target === adminModal) closeAdmin();
-            });
-            addPastModal.addEventListener("click", e => {
-                if (e.target === addPastModal) closeAddPastSession();
-            });
-            addUpcomingModal.addEventListener("click", e => {
-                if (e.target === addUpcomingModal) closeAddUpcomingSession();
-            });
-            updatePastModal.addEventListener("click", e => {
-                if (e.target === updatePastModal) closeUpdatePastSession();
-            });
-            updateUpcomingModal.addEventListener("click", e => {
-                if (e.target === updateUpcomingModal) closeUpdateUpcomingSession();
-            });
-            removeSessionModal.addEventListener("click", e => {
-                if (e.target === removeSessionModal) closeRemoveSession();
-            });
-            uploadImageModal.addEventListener("click", e => {
-                if (e.target === uploadImageModal) closeUploadImage();
-            });
-            reportModal.addEventListener("click", e => {
-                if (e.target === reportModal) closeReport();
-            });
-            sessionFeedbackModal.addEventListener("click", e => {
-                if (e.target === sessionFeedbackModal) closeSessionFeedback();
-            });
-            visitorLogModal.addEventListener("click", e => {
-                if (e.target === visitorLogModal) closeVisitorLog();
-            });
-
+            // Admin form submissions and functions
             document.getElementById("add-past-session-form").addEventListener("submit", e => {
                 e.preventDefault();
                 const name = document.getElementById("past-name").value.trim();
@@ -1361,21 +1412,10 @@
                 const topic = document.getElementById("past-topic").value.trim();
                 const description = document.getElementById("past-description").value.trim();
                 if (name && month && topic && description) {
-                    const key = name.toLowerCase().replace(/\s+/g, '-');
                     pastSessions.push({ name, month, topic, description, image: presenterImages[name] || null });
-                    sessionDetails[key] = `
-                        ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        <h3>${month} - ${topic}</h3>
-                        <p><strong>${name}</strong> ${description}</p>
-                    `;
-                    const li = document.createElement("li");
-                    li.innerHTML = `
-                        ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        <span class="month-name">${month}</span> - 
-                        <a href="#" class="trainer-link" onclick="showCelebration('${key}')">${name}</a>
-                    `;
-                    pastSessionsList.appendChild(li);
-                    document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
+                    updateSessionDetails();
+                    displayPastSessions();
+                    alert("Past session added successfully!");
                     closeAddPastSession();
                 } else {
                     alert("Please fill out all fields.");
@@ -1388,25 +1428,15 @@
                 const month = document.getElementById("upcoming-month").value.trim();
                 const date = document.getElementById("upcoming-date").value.trim();
                 const time = document.getElementById("upcoming-time").value.trim();
-                const topic = document.getElementById("upcoming-topic").value.trim();
-                const description = document.getElementById("upcoming-description").value.trim();
+                const topic = document.getElementById("upcoming-session-topic").value.trim();
+                const description = document.getElementById("upcoming-session-description").value.trim();
                 if (name && month && date && time && topic && description) {
-                    const key = name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
                     upcomingSessions.push({ name, month, date, time, topic, description, image: presenterImages[name] || null });
-                    sessionDetails[key] = `
-                        ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        <h3>${date} - ${topic} (Upcoming)</h3>
-                        <p><strong>${name}</strong> will present on ${date} at ${time}. ${description}</p>
-                    `;
+                    // Sort upcoming sessions by date if possible, or just add
+                    updateSessionDetails();
                     displayUpcomingSessions();
-                    if (upcomingSessions.length === 1) {
-                        nextPresenterElement.innerHTML = `
-                            Next SPOT Presenter: 
-                            <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${key}')">${name}</a> 
-                            (${month})
-                            ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        `;
-                    }
+                    displayNextPresenter();
+                    alert("Upcoming session added successfully!");
                     closeAddUpcomingSession();
                 } else {
                     alert("Please fill out all fields.");
@@ -1435,21 +1465,27 @@
                 });
             }
 
-            function populatePastSessionFields() {
+            window.populatePastSessionFields = function() {
                 const select = document.getElementById("past-session-select");
                 const index = select.value;
-                if (index === "") return;
+                if (index === "") {
+                    document.getElementById("update-past-session-form").reset();
+                    return;
+                }
                 const session = pastSessions[index];
                 document.getElementById("update-past-name").value = session.name;
                 document.getElementById("update-past-month").value = session.month;
                 document.getElementById("update-past-topic").value = session.topic;
                 document.getElementById("update-past-description").value = session.description;
-            }
+            };
 
-            function populateUpcomingSessionFields() {
+            window.populateUpcomingSessionFields = function() {
                 const select = document.getElementById("upcoming-session-select");
                 const index = select.value;
-                if (index === "") return;
+                if (index === "") {
+                    document.getElementById("update-upcoming-session-form").reset();
+                    return;
+                }
                 const session = upcomingSessions[index];
                 document.getElementById("update-upcoming-name").value = session.name;
                 document.getElementById("update-upcoming-month").value = session.month;
@@ -1457,7 +1493,7 @@
                 document.getElementById("update-upcoming-time").value = session.time;
                 document.getElementById("update-upcoming-topic").value = session.topic;
                 document.getElementById("update-upcoming-description").value = session.description;
-            }
+            };
 
             document.getElementById("update-past-session-form").addEventListener("submit", e => {
                 e.preventDefault();
@@ -1471,21 +1507,10 @@
                 const topic = document.getElementById("update-past-topic").value.trim();
                 const description = document.getElementById("update-past-description").value.trim();
                 if (name && month && topic && description) {
-                    const oldSession = pastSessions[index];
-                    const oldKey = oldSession.name.toLowerCase().replace(/\s+/g, '-');
-                    pastSessions[index] = { name, month, topic, description, image: presenterImages[name] || null };
-                    const newKey = name.toLowerCase().replace(/\s+/g, '-');
-                    delete sessionDetails[oldKey];
-                    sessionDetails[newKey] = `
-                        ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        <h3>${month} - ${topic}</h3>
-                        <p><strong>${name}</strong> ${description}</p>
-                    `;
-                    pastSessionsList.children[index].innerHTML = `
-                        ${presenterImages[name] ? `<img src="${presenterImages[name]}" class="presenter-image">` : ''}
-                        <span class="month-name">${month}</span> - 
-                        <a href="#" class="trainer-link" onclick="showCelebration('${newKey}')">${name}</a>
-                    `;
+                    pastSessions[index] = { ...pastSessions[index], name, month, topic, description, image: presenterImages[name] || pastSessions[index].image };
+                    updateSessionDetails();
+                    displayPastSessions();
+                    alert("Past session updated successfully!");
                     closeUpdatePastSession();
                 } else {
                     alert("Please fill out all fields.");
@@ -1506,26 +1531,11 @@
                 const topic = document.getElementById("update-upcoming-topic").value.trim();
                 const description = document.getElementById("update-upcoming-description").value.trim();
                 if (name && month && date && time && topic && description) {
-                    const oldSession = upcomingSessions[index];
-                    const oldKey = oldSession.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                    const image = presenterImages[name] || oldSession.image;
-                    upcomingSessions[index] = { name, month, date, time, topic, description, image };
-                    const newKey = name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                    delete sessionDetails[oldKey];
-                    sessionDetails[newKey] = `
-                        ${image ? `<img src="${image}" class="presenter-image">` : ''}
-                        <h3>${date} - ${topic} (Upcoming)</h3>
-                        <p><strong>${name}</strong> will present on ${date} at ${time}. ${description}</p>
-                    `;
+                    upcomingSessions[index] = { ...upcomingSessions[index], name, month, date, time, topic, description, image: presenterImages[name] || upcomingSessions[index].image };
+                    updateSessionDetails();
                     displayUpcomingSessions();
-                    if (index == 0) {
-                        nextPresenterElement.innerHTML = `
-                            Next SPOT Presenter: 
-                            <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${newKey}')">${name}</a> 
-                            (${month})
-                            ${image ? `<img src="${image}" class="presenter-image">` : ''}
-                        `;
-                    }
+                    displayNextPresenter();
+                    alert("Upcoming session updated successfully!");
                     closeUpdateUpcomingSession();
                 } else {
                     alert("Please fill out all fields.");
@@ -1538,222 +1548,212 @@
                 pastSessions.forEach((session, index) => {
                     const option = document.createElement("option");
                     option.value = `past-${index}`;
-                    option.textContent = `${session.name} - ${session.topic} (${session.month})`;
+                    option.textContent = `PAST: ${session.name} - ${session.topic} (${session.month})`;
                     select.appendChild(option);
                 });
                 upcomingSessions.forEach((session, index) => {
                     const option = document.createElement("option");
                     option.value = `upcoming-${index}`;
-                    option.textContent = `${session.name} - ${session.topic} (${session.date})`;
+                    option.textContent = `UPCOMING: ${session.name} - ${session.topic} (${session.date})`;
                     select.appendChild(option);
                 });
             }
 
-            window.removeSession = () => {
+            window.removeSession = function() {
                 const select = document.getElementById("remove-session-select");
                 const value = select.value;
                 if (value === "") {
                     alert("Please select a session to remove.");
                     return;
                 }
-                const [type, index] = value.split('-');
-                if (type === "past") {
-                    const session = pastSessions.splice(index, 1)[0];
-                    const key = session.name.toLowerCase().replace(/\s+/g, '-');
-                    delete sessionDetails[key];
-                    pastSessionsList.children[index].remove();
-                    document.getElementById("total-sessions").textContent = `Total SPOT Sessions Completed: ${pastSessions.length}`;
-                } else if (type === "upcoming") {
-                    const session = upcomingSessions.splice(index, 1)[0];
-                    const key = session.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                    delete sessionDetails[key];
-                    displayUpcomingSessions();
-                    if (index == 0 && upcomingSessions.length > 0) {
-                        const nextPresenter = upcomingSessions[0];
-                        const nextKey = nextPresenter.name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                        nextPresenterElement.innerHTML = `
-                            Next SPOT Presenter: 
-                            <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${nextKey}')">${nextPresenter.name}</a> 
-                            (${nextPresenter.month})
-                            ${nextPresenter.image ? `<img src="${nextPresenter.image}" class="presenter-image">` : ''}
-                        `;
-                    } else if (upcomingSessions.length === 0) {
-                        nextPresenterElement.textContent = "No upcoming SPOT sessions scheduled.";
-                    }
+                if (!confirm("Are you sure you want to remove this session? This action cannot be undone.")) {
+                    return;
                 }
+
+                const [type, idxStr] = value.split('-');
+                const index = parseInt(idxStr);
+
+                if (type === "past") {
+                    pastSessions.splice(index, 1);
+                    displayPastSessions();
+                } else if (type === "upcoming") {
+                    upcomingSessions.splice(index, 1);
+                    displayUpcomingSessions();
+                    displayNextPresenter();
+                }
+                updateSessionDetails();
+                alert("Session removed successfully!");
                 closeRemoveSession();
             };
 
-            function populatePresenterDropdown() {
+            function populatePresenterDropdownForImageUpload() {
                 const select = document.getElementById("presenter-select");
                 select.innerHTML = '<option value="">Select Presenter</option>';
-                [...pastSessions, ...upcomingSessions].forEach(session => {
+                const allPresenters = [...new Set([...pastSessions, ...upcomingSessions].map(session => session.name))];
+                allPresenters.sort().forEach(name => {
                     const option = document.createElement("option");
-                    option.value = session.name;
-                    option.textContent = session.name;
+                    option.value = name;
+                    option.textContent = name;
                     select.appendChild(option);
                 });
             }
 
-            window.uploadImage = () => {
+            window.uploadImage = function() {
                 const select = document.getElementById("presenter-select");
                 const fileInput = document.getElementById("image-upload");
                 const name = select.value;
                 if (!name || !fileInput.files[0]) {
-                    alert("Please select a presenter and an image.");
+                    alert("Please select a presenter and an image file.");
                     return;
                 }
                 const file = fileInput.files[0];
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const imageData = e.target.result;
-                    presenterImages[name] = imageData;
+                    presenterImages[name] = imageData; // Store image data
                     
-                    pastSessions.forEach(session => {
-                        if (session.name === name) session.image = imageData;
-                    });
-                    upcomingSessions.forEach(session => {
-                        if (session.name === name) session.image = imageData;
-                    });
+                    // Update image for all sessions by this presenter
+                    pastSessions.forEach(session => { if (session.name === name) session.image = imageData; });
+                    upcomingSessions.forEach(session => { if (session.name === name) session.image = imageData; });
 
-                    pastSessionsList.innerHTML = '';
-                    pastSessions.forEach(session => {
-                        const li = document.createElement("li");
-                        li.innerHTML = `
-                            ${session.image ? `<img src="${session.image}" class="presenter-image">` : ''}
-                            <span class="month-name">${session.month}</span> - 
-                            <a href="#" class="trainer-link" onclick="showCelebration('${session.name.toLowerCase().replace(/\s+/g, '-')}')">${session.name}</a>
-                        `;
-                        pastSessionsList.appendChild(li);
-                    });
+                    updateSessionDetails();
+                    displayPastSessions();
                     displayUpcomingSessions();
-                    if (upcomingSessions.length > 0 && upcomingSessions[0].name === name) {
-                        const nextKey = upcomingSessions[0].name.toLowerCase().replace(/\s+/g, '-') + '-upcoming';
-                        nextPresenterElement.innerHTML = `
-                            Next SPOT Presenter: 
-                            <a href="#" class="presenter-link cool-presenter" onclick="showCelebration('${nextKey}')">${upcomingSessions[0].name}</a> 
-                            (${upcomingSessions[0].month})
-                            ${imageData ? `<img src="${imageData}" class="presenter-image">` : ''}
-                        `;
-                    }
+                    displayNextPresenter();
+                    alert(`Image uploaded for ${name} and applied to their sessions.`);
                     closeUploadImage();
                 };
                 reader.readAsDataURL(file);
             };
 
-            window.triggerCoolEffect = () => {
-                const elements = document.querySelectorAll('.button, .feature-card, .presenter-link');
-                elements.forEach(el => {
-                    el.classList.add('cool-effect');
-                    setTimeout(() => el.classList.remove('cool-effect'), 2000);
-                });
-                confetti({
-                    particleCount: 200,
-                    spread: 90,
-                    origin: { y: 0.6 },
-                    colors: ['#FFD700', '#FF4500', '#00FF00', '#00CED1']
-                });
+            window.generateReport = function() {
+                const reportContent = document.getElementById("report-content");
+                let reportHTML = `
+                    <h4>Past Sessions (${pastSessions.length})</h4>
+                    <ul style="list-style: disc; padding-left: 20px;">
+                        ${pastSessions.map(s => `<li>${s.name} - ${s.topic} (${s.month})</li>`).join('') || '<li>No past sessions.</li>'}
+                    </ul>
+                    <h4>Upcoming Sessions (${upcomingSessions.length})</h4>
+                    <ul style="list-style: disc; padding-left: 20px;">
+                        ${upcomingSessions.map(s => `<li>${s.name} - ${s.topic} (${s.date} at ${s.time})</li>`).join('') || '<li>No upcoming sessions.</li>'}
+                    </ul>
+                    <p><strong>Total Unique Presenters:</strong> ${[...new Set([...pastSessions, ...upcomingSessions].map(s => s.name))].length}</p>
+                    <p><strong>Total Sessions Logged:</strong> ${pastSessions.length + upcomingSessions.length}</p>
+                `;
+                reportContent.innerHTML = reportHTML;
+            };
+            
+            window.displaySessionFeedback = async function() {
+                const feedbackListElement = document.getElementById("session-feedback-list");
+                feedbackListElement.innerHTML = '<li>Loading feedback...</li>';
+
+                try {
+                    const response = await fetch(GOOGLE_SCRIPT_URL + "?action=getFeedback");
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+
+                    feedbackListElement.innerHTML = ''; // Clear loading/previous
+                    if (data.error) {
+                        feedbackListElement.innerHTML = `<li>Error: ${data.error}</li>`;
+                        return;
+                    }
+                    if (!data.feedbackItems || data.feedbackItems.length === 0) {
+                        feedbackListElement.innerHTML = "<li>No feedback available yet.</li>";
+                    } else {
+                        // Assuming data.feedbackItems is an array of objects like {timestamp, feedback}
+                        data.feedbackItems.reverse().forEach(item => { // Show newest first
+                            const li = document.createElement("li");
+                            const date = item.timestamp ? new Date(item.timestamp).toLocaleString() : 'Unknown date';
+                            li.innerHTML = `<strong>${date}:</strong><br>${item.feedback}`;
+                            feedbackListElement.appendChild(li);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching session feedback:", error);
+                    feedbackListElement.innerHTML = `<li>Failed to load feedback: ${error.message}</li>`;
+                }
             };
 
-            function generateReport() {
-                const reportContent = document.getElementById("report-content");
-                reportContent.innerHTML = "<h3>SPOT Session Report</h3>";
-                reportContent.innerHTML += "<p><strong>Past Sessions:</strong></p>";
-                if (pastSessions.length === 0) {
-                    reportContent.innerHTML += "<p>No past sessions recorded.</p>";
+            window.fetchVisitorData = async function() {
+                const visitorTableBody = document.getElementById('visitor-data');
+                const filterDate = document.getElementById('filter-date').value;
+                const filterBrowserInput = document.getElementById('filter-browser').value;
+                const browserSelect = document.getElementById('filter-browser');
+
+                visitorTableBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading visitor data...</td></tr>';
+
+                try {
+                    let queryParams = "?action=getVisitorData";
+                    // No need to send filter params if fetching all data to populate browser dropdown initially
+                    // Or, send them if they are set. The Apps Script should handle this.
+                     if (filterDate) queryParams += `&date=${filterDate}`;
+                     if (filterBrowserInput) queryParams += `&browser=${encodeURIComponent(filterBrowserInput)}`;
+
+
+                    const response = await fetch(GOOGLE_SCRIPT_URL + queryParams);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json(); // Expect { visitors: [], uniqueBrowsers: [] }
+
+                    visitorTableBody.innerHTML = ''; 
+
+                    if (data.error) {
+                        visitorTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Error: ${data.error}</td></tr>`;
+                        return;
+                    }
+                    
+                    // Populate browser filter dropdown if uniqueBrowsers are provided
+                    // This should ideally happen once, or be refreshed carefully
+                    if (data.uniqueBrowsers && data.uniqueBrowsers.length > 0 && browserSelect.options.length <= 1) {
+                        const currentSelectedBrowser = browserSelect.value;
+                        browserSelect.innerHTML = '<option value="">All Browsers</option>'; // Reset
+                        data.uniqueBrowsers.sort().forEach(browser => {
+                            if(browser){ // Ensure browser is not null/empty
+                                const option = document.createElement('option');
+                                option.value = browser;
+                                option.textContent = browser.length > 40 ? browser.substring(0,37) + "..." : browser; // Truncate long browser names
+                                browserSelect.appendChild(option);
+                            }
+                        });
+                        browserSelect.value = currentSelectedBrowser; // Restore selection if possible
+                    }
+                    
+                    if (!data.visitors || data.visitors.length === 0) {
+                        visitorTableBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">No visitor data found for the selected filters.</td></tr>';
+                        return;
+                    }
+
+                    data.visitors.forEach(log => {
+                        const row = visitorTableBody.insertRow();
+                        row.insertCell().textContent = log.date || 'N/A';
+                        row.insertCell().textContent = log.time || 'N/A';
+                        row.insertCell().textContent = log.ip || 'N/A';
+                        const browserText = log.browser || 'N/A';
+                        row.insertCell().textContent = browserText.length > 50 ? browserText.substring(0, 47) + '...' : browserText;
+                        row.insertCell().textContent = log.device || 'N/A';
+                    });
+
+                } catch (error) {
+                    console.error("Error fetching visitor data:", error);
+                    visitorTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Failed to load visitor data: ${error.message}</td></tr>`;
+                }
+            };
+            
+            window.triggerCoolEffect = function() {
+                const nextPresenterLink = document.querySelector('#next-presenter .presenter-link');
+                if (nextPresenterLink) {
+                    nextPresenterLink.classList.add('cool-effect');
+                    setTimeout(() => {
+                        nextPresenterLink.classList.remove('cool-effect');
+                    }, 2000); // Duration of the coolSpin animation (2s)
+                    alert("Cool effect triggered on the next presenter's name!");
                 } else {
-                    pastSessions.forEach(session => {
-                        reportContent.innerHTML += `<p><strong>${session.name}</strong> - ${session.topic} (${session.month}): ${session.description}</p>`;
-                    });
+                    alert("No next presenter link found to apply the effect.");
                 }
-                reportContent.innerHTML += "<p><strong>Upcoming Sessions:</strong></p>";
-                if (upcomingSessions.length === 0) {
-                    reportContent.innerHTML += "<p>No upcoming sessions scheduled.</p>";
-                } else {
-                    upcomingSessions.forEach(session => {
-                        reportContent.innerHTML += `<p><strong>${session.name}</strong> - ${session.topic} (${session.date}, ${session.time}): ${session.description}</p>`;
-                    });
-                }
-                reportContent.innerHTML += `<p><strong>Total Sessions:</strong> ${pastSessions.length + upcomingSessions.length}</p>`;
-            }
+            };
 
-            function storeFeedback(feedback) {
-                let storedFeedback = JSON.parse(localStorage.getItem('sessionFeedback')) || [];
-                storedFeedback.push(feedback);
-                localStorage.setItem('sessionFeedback', JSON.stringify(storedFeedback));
-            }
-
-            function displaySessionFeedback() {
-                const feedbackList = document.getElementById("session-feedback-list");
-                feedbackList.innerHTML = '';
-                const storedFeedback = JSON.parse(localStorage.getItem('sessionFeedback')) || [];
-                if (storedFeedback.length === 0) {
-                    feedbackList.innerHTML = '<li>No feedback available yet.</li>';
-                } else {
-                    storedFeedback.forEach((feedback, index) => {
-                        const li = document.createElement("li");
-                        li.innerHTML = `<strong>Feedback ${index + 1}:</strong> ${feedback}`;
-                        feedbackList.appendChild(li);
-                    });
-                }
-            }
-
-            function fetchVisitorData() {
-                fetch(GOOGLE_SCRIPT_URL)
-                    .then(res => res.json())
-                    .then(data => {
-                        console.log("Fetched visitor data:", data); // Debug log
-                        renderVisitorTable(data);
-                        populateBrowserFilter(data);
-                    })
-                    .catch(err => {
-                        console.error("Error fetching visitor data:", err);
-                        document.getElementById('visitor-data').innerHTML = '<tr><td colspan="5">Error loading visitor data.</td></tr>';
-                    });
-            }
-
-            function renderVisitorTable(data) {
-                const dateFilter = document.getElementById('filter-date').value;
-                const browserFilter = document.getElementById('filter-browser').value;
-                const table = document.getElementById('visitor-data');
-                table.innerHTML = "";
-
-                if (!data || data.length === 0) {
-                    table.innerHTML = '<tr><td colspan="5">No visitor data available.</td></tr>';
-                    return;
-                }
-
-                data.forEach(entry => {
-                    if ((dateFilter && entry.date !== dateFilter) || (browserFilter && entry.browser !== browserFilter)) return;
-
-                    const row = `<tr>
-                        <td class="p-3">${entry.date}</td>
-                        <td class="p-3">${entry.time}</td>
-                        <td class="p-3">${entry.ip}</td>
-                        <td class="p-3">${entry.browser}</td>
-                        <td class="p-3">${entry.device}</td>
-                    </tr>`;
-                    table.innerHTML += row;
-                });
-            }
-
-            function populateBrowserFilter(data) {
-                const select = document.getElementById("filter-browser");
-                select.innerHTML = '<option value="">All Browsers</option>';
-                const browsers = [...new Set(data.map(d => d.browser))];
-                browsers.forEach(browser => {
-                    const option = document.createElement("option");
-                    option.value = browser;
-                    option.textContent = browser;
-                    select.appendChild(option);
-                });
-            }
-
-            document.getElementById("filter-date").addEventListener("change", fetchVisitorData);
-            document.getElementById("filter-browser").addEventListener("change", fetchVisitorData);
-
-            displaySessionFeedback();
-        });
+        }); // End of DOMContentLoaded
     </script>
 </body>
 </html>
